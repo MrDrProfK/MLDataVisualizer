@@ -123,7 +123,7 @@ public class RandomStudentPicker extends Application {
 			for (int i = 0; i < maxCount; i++) {
 			    if (event.getSource() == prevButton)
 			    {
-				currentIndex += 1;
+				currentIndex -= 1;// PREV BUTTON NOW DECREMENTS INDEX COUNTER
 				if (currentIndex < 0)
 				    currentIndex = students.size() - 1;
 			    }
