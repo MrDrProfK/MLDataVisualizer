@@ -130,6 +130,8 @@ public class RandomStudentPicker extends Application {
 			    else if (event.getSource() == nextButton)
 			    {
 				currentIndex += 1;
+                                if (currentIndex > students.size() - 1)
+				    currentIndex = 0;
 			    }
 			    else
 			    {
