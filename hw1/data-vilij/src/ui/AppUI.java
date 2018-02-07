@@ -1,6 +1,7 @@
 package ui;
 
 import actions.AppActions;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -46,8 +47,8 @@ public final class AppUI extends UITemplate {
         // TODO for homework 1
         // utilize super class method call for all but the final toolBarButton
         super.setToolBar(applicationTemplate);
-        // create screenshot toolBar button 
-        scrnshotButton = setToolbarButton(scrnshoticonPath, "Take a screenshot", false);
+        // create screenshot toolBar button (and disable screenshot button initially)
+        scrnshotButton = setToolbarButton(scrnshoticonPath, "Take a screenshot", true);
         // add screenshot toolBar button to list of pre-existing toolBar buttons on the toolBar
         toolBar.getItems().add(scrnshotButton);
     }
@@ -75,6 +76,12 @@ public final class AppUI extends UITemplate {
 
     private void layout() {
         // TODO for homework 1
+        NumberAxis horizontalAxis = new NumberAxis(0, 110, 10);
+        NumberAxis verticalAxis = new NumberAxis(0, 100, 10); 
+        chart = new ScatterChart<>(horizontalAxis,verticalAxis);
+        textArea = new TextArea();
+        displayButton = new Button("Display");
+        appPane.getChildren().addAll(chart, textArea, displayButton);
     }
 
     private void setWorkspaceActions() {
