@@ -25,6 +25,8 @@ public final class AppUI extends UITemplate {
     private TextArea                     textArea;       // text area for new data input
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
 
+    private String                       scrnshoticonPath;// relative (partial) path to SCREENSHOT_ICON
+    
     public ScatterChart<Number, Number> getChart() { return chart; }
 
     public AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
@@ -35,11 +37,19 @@ public final class AppUI extends UITemplate {
     @Override
     protected void setResourcePaths(ApplicationTemplate applicationTemplate) {
         super.setResourcePaths(applicationTemplate);
+        //set rel resource path for SCREENSHOT_ICON
+        scrnshoticonPath = "/gui/icons/screenshot.png";
     }
 
     @Override
     protected void setToolBar(ApplicationTemplate applicationTemplate) {
         // TODO for homework 1
+        // utilize super class method call for all but the final toolBarButton
+        super.setToolBar(applicationTemplate);
+        // create screenshot toolBar button 
+        scrnshotButton = setToolbarButton(scrnshoticonPath, "Take a screenshot", false);
+        // add screenshot toolBar button to list of pre-existing toolBar buttons on the toolBar
+        toolBar.getItems().add(scrnshotButton);
     }
 
     @Override
