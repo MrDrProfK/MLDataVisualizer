@@ -1,6 +1,8 @@
 package ui;
 
 import actions.AppActions;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
@@ -8,6 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
@@ -85,17 +89,23 @@ public final class AppUI extends UITemplate {
         
         // declare/initialize UI objects to be included in the first column
         Label dataFileLabel = new Label("Data File");
+        dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         textArea = new TextArea();
         displayButton = new Button("Display");
         
         // create first column
         VBox vbox0 = new VBox();
-        vbox0.setPrefWidth(windowWidth * .3);
+        vbox0.setPrefWidth(windowWidth * .35);
         // add elements to first column
         vbox0.getChildren().addAll(dataFileLabel,textArea,displayButton);
+        // align and space UI objects within the column
+        vbox0.setAlignment(Pos.TOP_CENTER);
+        vbox0.setSpacing(10);
+        vbox0.setPadding(new Insets(10, 0, 10, 20));
         
         // declare/initialize UI objects to be included in the second column
         Label dataVisLabel = new Label("Data Visualization");
+        dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         chart = new ScatterChart<>(horizontalAxis,verticalAxis);
         
         // create second column
@@ -103,6 +113,9 @@ public final class AppUI extends UITemplate {
         vbox1.setPrefWidth(windowWidth * .65);
         // add elements to second column
         vbox1.getChildren().addAll(dataVisLabel, chart);
+        // align and space UI objects within the column
+        vbox1.setAlignment(Pos.TOP_CENTER);
+        vbox1.setPadding(new Insets(10, 20, 0, 0));
         
         // create a pane to hold both columns
         HBox hbox = new HBox();
