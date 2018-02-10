@@ -70,8 +70,7 @@ public final class TSDProcessor {
      *
      * @param chart the specified chart
      */
-    // below method is now explicitly public for use in AppUI class
-    public void toChartData(XYChart<Number, Number> chart) {
+    void toChartData(XYChart<Number, Number> chart) {
         Set<String> labels = new HashSet<>(dataLabels.values());
         for (String label : labels) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
@@ -84,8 +83,7 @@ public final class TSDProcessor {
         }
     }
 
-    // below method is now explicitly public for use in AppUI class
-    public void clear() {
+    void clear() {
         dataPoints.clear();
         dataLabels.clear();
     }
