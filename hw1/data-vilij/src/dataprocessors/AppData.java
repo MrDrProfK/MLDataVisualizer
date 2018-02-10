@@ -29,6 +29,11 @@ public class AppData implements DataComponent {
 
     public void loadData(String dataString) {
         // TODO for homework 1
+        try{
+            processor.processString(dataString);
+        }catch (Exception ex){
+            System.out.println(ex.toString());
+        }
     }
 
     @Override
