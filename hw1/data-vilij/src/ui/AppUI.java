@@ -1,6 +1,7 @@
 package ui;
 
 import actions.AppActions;
+import dataprocessors.TSDProcessor;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
@@ -34,6 +35,7 @@ public final class AppUI extends UITemplate {
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
 
     private String                       scrnshoticonPath;// relative (partial) path to SCREENSHOT_ICON
+    private TSDProcessor                 dataProcessor;  // for chart data manipulation
     
     public ScatterChart<Number, Number> getChart() { return chart; }
 
@@ -79,6 +81,8 @@ public final class AppUI extends UITemplate {
     @Override
     public void clear() {
         // TODO for homework 1
+        // clear data from data processor instance
+        dataProcessor.clear();
     }
 
     private void layout() {
@@ -128,5 +132,7 @@ public final class AppUI extends UITemplate {
 
     private void setWorkspaceActions() {
         // TODO for homework 1
+        // initialize data processor instance 
+        dataProcessor = new TSDProcessor();
     }
 }
