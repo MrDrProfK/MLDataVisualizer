@@ -56,8 +56,6 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleExitRequest() {
         // TODO for homework 1
-        handleNewRequest(); // used for testing new button Functionality w/o activating new button
-        // terminate app execution when exit button is clicked
         Platform.exit();
     }
 
