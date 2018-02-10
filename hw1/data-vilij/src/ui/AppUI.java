@@ -1,7 +1,7 @@
 package ui;
 
 import actions.AppActions;
-import dataprocessors.TSDProcessor;
+import dataprocessors.AppData;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
@@ -35,7 +35,6 @@ public final class AppUI extends UITemplate {
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
 
     private String                       scrnshoticonPath;// relative (partial) path to SCREENSHOT_ICON
-    private TSDProcessor                 dataProcessor;  // for chart data manipulation
     
     public ScatterChart<Number, Number> getChart() { return chart; }
 
@@ -82,15 +81,11 @@ public final class AppUI extends UITemplate {
     public void clear() {
         // TODO for homework 1
         // clear data from data processor instance
-        dataProcessor.clear();
+        ((AppData) applicationTemplate.getDataComponent()).clear();
     }
 
     private void layout() {
         // TODO for homework 1
-        // necessary axis declarations (with initial scale and range/domain params set)
-        NumberAxis horizontalAxis = new NumberAxis(0, 110, 10);
-        NumberAxis verticalAxis = new NumberAxis(0, 100, 10); 
-        
         // declare/initialize UI objects to be included in the first column
         Label dataFileLabel = new Label("Data File");
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
@@ -110,7 +105,8 @@ public final class AppUI extends UITemplate {
         // declare/initialize UI objects to be included in the second column
         Label dataVisLabel = new Label("Data Visualization");
         dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
-        chart = new ScatterChart<>(horizontalAxis,verticalAxis);
+        // initialize new scatter chart with unspecified axis ranges/tick values for automatic scaling
+        chart = new ScatterChart<>(new NumberAxis(),new NumberAxis());
         
         // create second column
         VBox vbox1 = new VBox();
@@ -132,7 +128,15 @@ public final class AppUI extends UITemplate {
 
     private void setWorkspaceActions() {
         // TODO for homework 1
-        // initialize data processor instance 
-        dataProcessor = new TSDProcessor();
+        // when display button is clicked...
+        displayButton.setOnAction(e -> {
+            // load data from textArea into the data processor...
+            ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
+            // and plot data
+            ((AppData) applicationTemplate.getDataComponent()).displayData();
+        });
+        textArea.setOnKeyTyped(e -> {
+            newButton.setDisable(false);
+        });
     }
 }
