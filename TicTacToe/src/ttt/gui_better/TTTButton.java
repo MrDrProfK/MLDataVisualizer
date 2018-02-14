@@ -22,11 +22,32 @@ public class TTTButton extends Button {
         this.engine = engine;
         this.row = row;
         this.col = col;
-        // ???
+        
+        // set preferred button dimensions
+        setPrefWidth(PREF_SIZE);
+        setPrefHeight(PREF_SIZE);
+        
+        // for max button dimensions, so buttons can resize/scale
+        setMaxWidth(Double.MAX_VALUE);
+        setMaxHeight(Double.MAX_VALUE);
+        
+        setListener();
     }
 
     private void setListener() {
-        // ???
+        // configure button listener and actions for button press
+        setOnAction(e -> {
+            try {
+                setText(engine.getPlayerToMove()
+                        == TTTEngine.X_PLAYER ? "X" : "O");
+                engine.makeMove(row, col);
+                if (engine.gameOver()) {
+                    gui.alertGameOver();
+                }
+            } catch (TTTEngine.IllegalMoveException x) {
+                gui.alertIllegalMove();
+            }
+        });
     }
 
 }
