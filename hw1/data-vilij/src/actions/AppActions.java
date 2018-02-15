@@ -45,7 +45,8 @@ public final class AppActions implements ActionComponent {
                 applicationTemplate.getUIComponent().clear();
             }
         } catch (IOException promptException) {
-            System.out.println(promptException.toString());
+            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                    .show("Data Not Saved.", promptException.getLocalizedMessage());
         }
     }
 
@@ -108,11 +109,11 @@ public final class AppActions implements ActionComponent {
             File file = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
 
             // create and write to new file if file is NOT null
-            if (file != null) {
-                FileWriter fileWriter = new FileWriter(file);
+            try (FileWriter fileWriter = new FileWriter(file)) {
                 // write contents of textArea to file
                 fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
-                fileWriter.close();
+            } catch (Exception e) {
+                throw new IOException("Data was not saved to disk.", e);
             }
         } else if (confirmationDialog.getSelectedOption() == Option.CANCEL) {
             // return false for CANCEL button click
