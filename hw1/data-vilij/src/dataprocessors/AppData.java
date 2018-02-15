@@ -5,16 +5,18 @@ import vilij.components.DataComponent;
 import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
+import vilij.components.Dialog;
 
 /**
- * This is the concrete application-specific implementation of the data component defined by the Vilij framework.
+ * This is the concrete application-specific implementation of the data
+ * component defined by the Vilij framework.
  *
  * @author Ritwik Banerjee
  * @see DataComponent
  */
 public class AppData implements DataComponent {
 
-    private TSDProcessor        processor;
+    private TSDProcessor processor;
     private ApplicationTemplate applicationTemplate;
 
     public AppData(ApplicationTemplate applicationTemplate) {
@@ -29,10 +31,12 @@ public class AppData implements DataComponent {
 
     public void loadData(String dataString) {
         // TODO for homework 1
-        try{
+        try {
             processor.processString(dataString);
-        }catch (Exception ex){
-            System.out.println(ex.toString());
+        } catch (Exception ex) {
+            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                    .show("Invalid Data", "Data must conform to the Tab-Separated Format. "
+                            + "For example:\n@InstanceName[TAB Press]Label[TAB Press]X-Coord,Y-Coord");
         }
     }
 
