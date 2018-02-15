@@ -24,19 +24,23 @@ import vilij.templates.UITemplate;
  */
 public final class AppUI extends UITemplate {
 
-    /** The application to which this class of actions belongs. */
+    /**
+     * The application to which this class of actions belongs.
+     */
     ApplicationTemplate applicationTemplate;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private Button                       scrnshotButton; // toolbar button to take a screenshot of the data
-    private ScatterChart<Number, Number> chart;          // the chart where data will be displayed
-    private Button                       displayButton;  // workspace button to display data on the chart
-    private TextArea                     textArea;       // text area for new data input
-    private boolean                      hasNewText;     // whether or not the text area has any new data since last display
+    private Button scrnshotButton;              // toolbar button to take a screenshot of the data
+    private ScatterChart<Number, Number> chart; // the chart where data will be displayed
+    private Button displayButton;               // workspace button to display data on the chart
+    private TextArea textArea;                  // text area for new data input
+    private boolean hasNewText;                 // whether or not the text area has any new data since last display
 
-    private String                       scrnshoticonPath;// relative (partial) path to SCREENSHOT_ICON
-    
-    public ScatterChart<Number, Number> getChart() { return chart; }
+    private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
+
+    public ScatterChart<Number, Number> getChart() {
+        return chart;
+    }
 
     public AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
         super(primaryStage, applicationTemplate);
@@ -46,7 +50,7 @@ public final class AppUI extends UITemplate {
     @Override
     protected void setResourcePaths(ApplicationTemplate applicationTemplate) {
         super.setResourcePaths(applicationTemplate);
-        //set rel resource path for SCREENSHOT_ICON
+        // set rel resource path for SCREENSHOT_ICON
         scrnshoticonPath = "/gui/icons/screenshot.png";
     }
 
@@ -80,8 +84,14 @@ public final class AppUI extends UITemplate {
     @Override
     public void clear() {
         // TODO for homework 1
-        // clear data from data processor instance
-        ((AppData) applicationTemplate.getDataComponent()).clear();
+        // clear contents of textArea and scatter chart
+        textArea.clear();
+        chart.getData().clear();
+        // disable new and save buttons upon clearing textArea and chart
+        newButton.setDisable(true);
+        saveButton.setDisable(true);
+        // no new data to be displayed as there is NO DATA in textArea
+        hasNewText = false;
     }
 
     private void layout() {
@@ -91,23 +101,23 @@ public final class AppUI extends UITemplate {
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         textArea = new TextArea();
         displayButton = new Button("Display");
-        
+
         // create first column
         VBox vbox0 = new VBox();
         vbox0.setPrefWidth(windowWidth * .35);
         // add elements to first column
-        vbox0.getChildren().addAll(dataFileLabel,textArea,displayButton);
+        vbox0.getChildren().addAll(dataFileLabel, textArea, displayButton);
         // align and space UI objects within the column
         vbox0.setAlignment(Pos.TOP_CENTER);
         vbox0.setSpacing(10);
         vbox0.setPadding(new Insets(10, 0, 10, 20));
-        
+
         // declare/initialize UI objects to be included in the second column
         Label dataVisLabel = new Label("Data Visualization");
         dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         // initialize new scatter chart with unspecified axis ranges/tick values for automatic scaling
-        chart = new ScatterChart<>(new NumberAxis(),new NumberAxis());
-        
+        chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
+
         // create second column
         VBox vbox1 = new VBox();
         vbox1.setPrefWidth(windowWidth * .65);
@@ -116,27 +126,64 @@ public final class AppUI extends UITemplate {
         // align and space UI objects within the column
         vbox1.setAlignment(Pos.TOP_CENTER);
         vbox1.setPadding(new Insets(10, 20, 0, 0));
-        
+
         // create a pane to hold both columns
         HBox hbox = new HBox();
         // add both columns (vbox0 and vbox1) to the HBox pane
         hbox.getChildren().addAll(vbox0, vbox1);
-        
+
         // add the pane containing both columns to inside of pre-existing VBox root pane
         appPane.getChildren().add(hbox);
     }
 
     private void setWorkspaceActions() {
         // TODO for homework 1
+        hasNewText = false;
+
         // when display button is clicked...
         displayButton.setOnAction(e -> {
-            // load data from textArea into the data processor...
-            ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
-            // and plot data
-            ((AppData) applicationTemplate.getDataComponent()).displayData();
+            if (hasNewText) {
+                // clear scatter chart immediately before plotting new data
+                chart.getData().clear();
+                // load data from textArea into the data processor...
+                ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
+                // and plot data
+                ((AppData) applicationTemplate.getDataComponent()).displayData();
+                // clear data from data processor (maybe optional???)
+                ((AppData) applicationTemplate.getDataComponent()).clear();
+                hasNewText = false;
+            }
+
         });
+
         textArea.setOnKeyTyped(e -> {
-            newButton.setDisable(false);
+            // if the textArea is empty...
+            if (textArea.getText().trim().isEmpty()) {
+                // keep new and save buttons disabled
+                newButton.setDisable(true);
+                saveButton.setDisable(true);
+                // no new data to be displayed as there is NO DATA in textArea
+                hasNewText = false;
+                // if a newline character exists in the contents of textArea
+                // (at least one line exists and has been terminated)...
+            } else if (textArea.getText().indexOf('\n') != -1) {
+                // enable the new and save buttons
+                newButton.setDisable(false);
+                saveButton.setDisable(false);
+            } else {
+                // new data that can potentially be displayed, by virtue of there being a newly typed character
+                hasNewText = true;
+            }
         });
+    }
+
+    /**
+     * Public getter method for the contents of textArea.
+     *
+     * @return contents of textArea as a string with no leading or trailing
+     * white space
+     */
+    public String getTextAreaData() {
+        return textArea.getText().trim();
     }
 }
