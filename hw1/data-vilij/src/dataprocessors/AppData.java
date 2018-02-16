@@ -5,7 +5,10 @@ import vilij.components.DataComponent;
 import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
+import static settings.AppPropertyTypes.*;
 import vilij.components.Dialog;
+import vilij.propertymanager.PropertyManager;
+import static vilij.settings.PropertyTypes.*;
 
 /**
  * This is the concrete application-specific implementation of the data
@@ -31,12 +34,13 @@ public class AppData implements DataComponent {
 
     public void loadData(String dataString) {
         // TODO for homework 1
+        PropertyManager manager = applicationTemplate.manager;
         try {
             processor.processString(dataString);
         } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                    .show("Invalid Data", "Data must conform to the Tab-Separated Format. "
-                            + "For example:\n@InstanceName[TAB Press]Label[TAB Press]X-Coord,Y-Coord");
+                    .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()), 
+                            manager.getPropertyValue(INVALID_DATA_FORMAT.name()));
         }
     }
 
