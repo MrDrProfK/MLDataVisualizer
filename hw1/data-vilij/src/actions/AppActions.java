@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
+import static settings.AppPropertyTypes.*;
 import ui.AppUI;
 import vilij.components.ConfirmationDialog;
 import vilij.components.ConfirmationDialog.Option;
 import vilij.components.Dialog;
+import vilij.propertymanager.PropertyManager;
 
 /**
  * This is the concrete implementation of the action handlers required by the
@@ -45,8 +47,9 @@ public final class AppActions implements ActionComponent {
                 applicationTemplate.getUIComponent().clear();
             }
         } catch (IOException promptException) {
+            PropertyManager manager = applicationTemplate.manager;
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                    .show("Data Not Saved.", promptException.getLocalizedMessage());
+                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
         }
     }
 
@@ -95,15 +98,18 @@ public final class AppActions implements ActionComponent {
     private boolean promptToSave() throws IOException {
         // TODO for homework 1
         // TODO remove the placeholder line below after you have implemented this method
+        PropertyManager manager = applicationTemplate.manager;
+        
         ConfirmationDialog confirmationDialog = (ConfirmationDialog)applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
-        confirmationDialog.show("Save Current Work", "Would you like to save current work?");
+        confirmationDialog.show(manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()), manager.getPropertyValue(SAVE_UNSAVED_WORK.name()));
         
         // analyze the dialog button clicked
         if (confirmationDialog.getSelectedOption() == Option.YES) {
             FileChooser fileChooser = new FileChooser();
 
             // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Tab-Separated Data File (*.tsd)", "*.tsd");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()), 
+                    '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
             fileChooser.getExtensionFilters().add(extFilter);
 
             File file = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
@@ -113,7 +119,7 @@ public final class AppActions implements ActionComponent {
                 // write contents of textArea to file
                 fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
             } catch (Exception e) {
-                throw new IOException("Data was not saved to disk.", e);
+                throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
             }
         } else if (confirmationDialog.getSelectedOption() == Option.CANCEL) {
             // return false for CANCEL button click

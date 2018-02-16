@@ -14,15 +14,26 @@ public enum AppPropertyTypes {
 
     /* user interface icon file names */
     SCREENSHOT_ICON,
-
+    
+    /* user interface object label text */
+    DATA_FILE_LABEL_TEXT,
+    DISPLAY_BUTTON_TEXT,
+    GRAPH_LABEL_TEXT,
+    
     /* tooltips for user interface buttons */
     SCREENSHOT_TOOLTIP,
 
+    /* warning messages */
+    EXIT_WHILE_RUNNING_WARNING,
+    DATA_NOT_SAVED_WARNING,
+    
     /* error messages */
     RESOURCE_SUBDIR_NOT_FOUND,
+    INVALID_DATA_FORMAT,
 
     /* application-specific message titles */
     SAVE_UNSAVED_WORK_TITLE,
+    DATA_NOT_SAVED_WARNING_TITLE,
 
     /* application-specific messages */
     SAVE_UNSAVED_WORK,

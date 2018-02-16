@@ -40,7 +40,7 @@ public class AppData implements DataComponent {
         } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
                     .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()), 
-                            manager.getPropertyValue(INVALID_DATA_FORMAT.name()));
+                            manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
         }
     }
 

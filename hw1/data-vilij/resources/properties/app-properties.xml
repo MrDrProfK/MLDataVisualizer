@@ -10,18 +10,26 @@ functionality within the main workspace. -->
         <!-- USER INTERFACE ICON FILES -->
         <property name="SCREENSHOT_ICON" value="screenshot.png"/>
 
+        <!-- USER INTERFACE OBJECT LABELS -->
+        <property name="DATA_FILE_LABEL_TEXT" value="Data File"/>
+        <property name="DISPLAY_BUTTON_TEXT" value="Display"/>
+        <property name="GRAPH_LABEL_TEXT" value="Data Visualization"/>
+        
         <!-- TOOLTIPS FOR BUTTONS -->
         <property name="SCREENSHOT_TOOLTIP" value="Screenshot"/> <!-- will print current view of image to a file -->
 
         <!-- WARNING MESSAGES -->
         <property name="EXIT_WHILE_RUNNING_WARNING"
                   value="An algorithm is running. If you exit now, all unsaved changes will be lost. Are you sure?"/>
-
+        <property name="DATA_NOT_SAVED_WARNING" value="Data Not Saved"/>        
+        
         <!-- ERROR MESSAGES -->
         <property name="RESOURCE_SUBDIR_NOT_FOUND" value="Directory not found under resources."/>
-
+        <property name="INVALID_DATA_FORMAT" value="Data must conform to the Tab-Separated Format. For example:\n@InstanceName[TAB Press]Label[TAB Press]X-Coord,Y-Coord"/>
+        
         <!-- APPLICATION-SPECIFIC MESSAGE TITLES -->
         <property name="SAVE_UNSAVED_WORK_TITLE" value="Save Current Work"/>
+        <property name="DATA_NOT_SAVED_WARNING_TITLE" value="Data was not saved to the disk."/>
 
         <!-- APPLICATION-SPECIFIC MESSAGES -->
         <property name="SAVE_UNSAVED_WORK" value="Would you like to save current work?"/>

@@ -2,6 +2,7 @@ package ui;
 
 import actions.AppActions;
 import dataprocessors.AppData;
+import static java.io.File.separator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
@@ -14,6 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import static settings.AppPropertyTypes.*;
+import vilij.propertymanager.PropertyManager;
+import static vilij.settings.PropertyTypes.*;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
 
@@ -51,7 +55,12 @@ public final class AppUI extends UITemplate {
     protected void setResourcePaths(ApplicationTemplate applicationTemplate) {
         super.setResourcePaths(applicationTemplate);
         // set rel resource path for SCREENSHOT_ICON
-        scrnshoticonPath = "/gui/icons/screenshot.png";
+        PropertyManager manager = applicationTemplate.manager;
+        String iconsPath = "/" + String.join(separator,
+                                             manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
+                                             manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
+                                         
+        scrnshoticonPath = String.join(separator, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
     }
 
     @Override
@@ -59,8 +68,9 @@ public final class AppUI extends UITemplate {
         // TODO for homework 1
         // utilize super class method call for all but the final toolBarButton
         super.setToolBar(applicationTemplate);
+        PropertyManager manager = applicationTemplate.manager;
         // create screenshot toolBar button (and disable screenshot button initially)
-        scrnshotButton = setToolbarButton(scrnshoticonPath, "Take a screenshot", true);
+        scrnshotButton = setToolbarButton(scrnshoticonPath, manager.getPropertyValue(SCREENSHOT_TOOLTIP.name()), true);
         // add screenshot toolBar button to list of pre-existing toolBar buttons on the toolBar
         toolBar.getItems().add(scrnshotButton);
     }
@@ -96,11 +106,12 @@ public final class AppUI extends UITemplate {
 
     private void layout() {
         // TODO for homework 1
+        PropertyManager manager = applicationTemplate.manager;
         // declare/initialize UI objects to be included in the first column
-        Label dataFileLabel = new Label("Data File");
+        Label dataFileLabel = new Label(manager.getPropertyValue(DATA_FILE_LABEL_TEXT.name()));
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         textArea = new TextArea();
-        displayButton = new Button("Display");
+        displayButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
 
         // create first column
         VBox vbox0 = new VBox();
@@ -113,7 +124,7 @@ public final class AppUI extends UITemplate {
         vbox0.setPadding(new Insets(10, 0, 10, 20));
 
         // declare/initialize UI objects to be included in the second column
-        Label dataVisLabel = new Label("Data Visualization");
+        Label dataVisLabel = new Label(manager.getPropertyValue(GRAPH_LABEL_TEXT.name()));
         dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         // initialize new scatter chart with unspecified axis ranges/tick values for automatic scaling
         chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
@@ -156,7 +167,7 @@ public final class AppUI extends UITemplate {
 
         });
 
-        textArea.setOnKeyTyped(e -> {
+        textArea.setOnKeyReleased(e -> {
             // if the textArea is empty...
             if (textArea.getText().trim().isEmpty()) {
                 // keep new and save buttons disabled
