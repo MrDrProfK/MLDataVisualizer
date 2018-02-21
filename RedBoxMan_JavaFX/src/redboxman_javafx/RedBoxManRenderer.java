@@ -93,6 +93,10 @@ public class RedBoxManRenderer extends Application {
 	int headW = 115;
 	int headH = 88;
     
+        String eyeColor = "#FFFF00";
+	int eyeW = 33;
+	int eyeH = 26;
+        
 	// DRAW HIS RED HEAD
         gc.setFill(Paint.valueOf(headColor));
 	gc.fillRect(location.getX(), location.getY(), headW, headH);
@@ -103,6 +107,57 @@ public class RedBoxManRenderer extends Application {
 	gc.stroke();
 	
 	// AND THEN DRAW THE REST OF HIM
+        // draw eyes w/o pupils
+        gc.setFill(Paint.valueOf(eyeColor));
+	gc.fillRect(location.getX()+15, location.getY()+13, eyeW, eyeH);
+        gc.beginPath();
+	gc.setStroke(Paint.valueOf(outlineColor));
+	gc.setLineWidth(1);
+	gc.rect(location.getX()+15, location.getY()+13, eyeW, eyeH);
+	gc.stroke();
+        
+        gc.fillRect(location.getX()+72, location.getY()+13, eyeW, eyeH);
+        gc.rect(location.getX()+72, location.getY()+13, eyeW, eyeH);
+        gc.stroke();
+        
+        // draw pupils
+        gc.setFill(Paint.valueOf(outlineColor));
+	gc.fillRect(location.getX()+30, location.getY()+22, 6, 6);
+//        gc.beginPath();
+//	gc.setStroke(Paint.valueOf(outlineColor));
+//	gc.setLineWidth(1);
+	gc.rect(location.getX()+30, location.getY()+22, 6, 6);
+	gc.stroke();
+        
+        gc.fillRect(location.getX()+87, location.getY()+22, 6, 6);
+        gc.rect(location.getX()+87, location.getY()+22, 6, 6);
+        gc.stroke();
+        
+        // draw mouth
+	gc.fillRect(location.getX()+22, location.getY()+65, 80, 8);
+	gc.rect(location.getX()+22, location.getY()+65, 80, 8);
+	gc.stroke();
+        
+        // draw upper body
+        gc.fillRect(location.getX()+30, location.getY()+88, 55, 20);
+	gc.rect(location.getX()+30, location.getY()+88, 55, 20);
+	gc.stroke();
+        
+        // draw lower body
+        gc.fillRect(location.getX()+34, location.getY()+108, 45, 10);
+	gc.rect(location.getX()+34, location.getY()+108, 45, 10);
+	gc.stroke();
+        
+        // draw feet
+        gc.fillRect(location.getX()+30, location.getY()+118, 10, 10);
+	gc.rect(location.getX()+30, location.getY()+118, 10, 10);
+	gc.stroke();
+        
+        gc.fillRect(location.getX()+73, location.getY()+118, 10, 10);
+	gc.rect(location.getX()+73, location.getY()+118, 10, 10);
+	gc.stroke();
+        
+        
     }
     
     public void renderImageRedBoxMan(Point2D location) {
