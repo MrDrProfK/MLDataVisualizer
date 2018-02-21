@@ -91,6 +91,10 @@ function renderShapesRedBoxMan(location) {
     var headW = 115;
     var headH = 88;
     
+    var eyeColor = "#FFFF00";
+    var eyeW = 33;
+    var eyeH = 26;
+    
     // DRAW HIS RED HEAD
     gc.fillStyle = headColor;
     gc.fillRect(location.x, location.y, headW, headH);
@@ -99,8 +103,54 @@ function renderShapesRedBoxMan(location) {
     gc.lineWidth = 1;
     gc.rect(location.x, location.y, headW, headH);
     gc.stroke();
-    
+
     // AND THEN DRAW THE REST OF HIM
+    // draw eyes w/o pupils
+    gc.fillStyle = eyeColor;
+    gc.fillRect(location.x + 15, location.y + 13, eyeW, eyeH);
+    gc.beginPath();
+    gc.strokeStyle = outlineColor;
+    gc.setLineWidth(1);
+    gc.rect(location.x + 15, location.y + 13, eyeW, eyeH);
+    gc.stroke();
+
+    gc.fillRect(location.x + 72, location.y + 13, eyeW, eyeH);
+    gc.rect(location.x + 72, location.y + 13, eyeW, eyeH);
+    gc.stroke();
+
+    // draw pupils
+    gc.fillStyle = outlineColor;
+    gc.fillRect(location.x + 30, location.y + 22, 6, 6);
+    gc.rect(location.x + 30, location.y + 22, 6, 6);
+    gc.stroke();
+
+    gc.fillRect(location.x + 87, location.y + 22, 6, 6);
+    gc.rect(location.x + 87, location.y + 22, 6, 6);
+    gc.stroke();
+
+    // draw mouth
+    gc.fillRect(location.x + 22, location.y + 65, 80, 8);
+    gc.rect(location.x + 22, location.y + 65, 80, 8);
+    gc.stroke();
+
+    // draw upper body
+    gc.fillRect(location.x + 30, location.y + 88, 55, 20);
+    gc.rect(location.x + 30, location.y + 88, 55, 20);
+    gc.stroke();
+
+    // draw lower body
+    gc.fillRect(location.x + 34, location.y + 108, 45, 10);
+    gc.rect(location.x + 34, location.y + 108, 45, 10);
+    gc.stroke();
+
+    // draw feet
+    gc.fillRect(location.x + 30, location.y + 118, 10, 10);
+    gc.rect(location.x + 30, location.y + 118, 10, 10);
+    gc.stroke();
+
+    gc.fillRect(location.x + 73, location.y + 118, 10, 10);
+    gc.rect(location.x + 73, location.y + 118, 10, 10);
+    gc.stroke();
 }
 
 function renderImageRedBoxMan(location) {
