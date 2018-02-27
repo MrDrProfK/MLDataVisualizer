@@ -57,9 +57,9 @@ public final class AppUI extends UITemplate {
         // set rel resource path for SCREENSHOT_ICON
         PropertyManager manager = applicationTemplate.manager;
         String iconsPath = "/" + String.join(separator,
-                                             manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
-                                             manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
-                                         
+                manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
+                manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
+
         scrnshoticonPath = String.join(separator, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
     }
 
@@ -99,7 +99,7 @@ public final class AppUI extends UITemplate {
         chart.getData().clear();
         // disable new and save buttons upon clearing textArea and chart
         newButton.setDisable(true);
-        saveButton.setDisable(true);
+        disableSaveButton();
         // no new data to be displayed as there is NO DATA in textArea
         hasNewText = false;
     }
@@ -189,12 +189,20 @@ public final class AppUI extends UITemplate {
     }
 
     /**
-     * Public getter method for the contents of textArea.
+     * Getter method for the retrieval of textArea contents.
      *
      * @return contents of textArea as a string with no leading or trailing
      * white space
      */
     public String getTextAreaData() {
         return textArea.getText().trim();
+    }
+
+    /**
+     * Setter method used to disable saveButton.
+     * 
+     */
+    public void disableSaveButton() {
+        saveButton.setDisable(true);
     }
 }
