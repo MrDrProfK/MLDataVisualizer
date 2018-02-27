@@ -55,12 +55,21 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleSaveRequest() {
-        // TODO: NOT A PART OF HW 1
+        // TODO for homework 2
+        // try to prompt user to Save as...
+        try {
+            saveWithDialog();
+            ((AppUI) applicationTemplate.getUIComponent()).disableSaveButton();
+        } catch (IOException promptException) {
+            PropertyManager manager = applicationTemplate.manager;
+            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
+        }
     }
 
     @Override
     public void handleLoadRequest() {
-        // TODO: NOT A PART OF HW 1
+        // TODO for homework 2
     }
 
     @Override
@@ -75,7 +84,7 @@ public final class AppActions implements ActionComponent {
     }
 
     public void handleScreenshotRequest() throws IOException {
-        // TODO: NOT A PART OF HW 1
+        // TODO for homework 2
     }
 
     /**
@@ -97,7 +106,6 @@ public final class AppActions implements ActionComponent {
      */
     private boolean promptToSave() throws IOException {
         // TODO for homework 1
-        // TODO remove the placeholder line below after you have implemented this method
         PropertyManager manager = applicationTemplate.manager;
         
         ConfirmationDialog confirmationDialog = (ConfirmationDialog)applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
@@ -105,20 +113,9 @@ public final class AppActions implements ActionComponent {
         
         // analyze the dialog button clicked
         if (confirmationDialog.getSelectedOption() == Option.YES) {
-            FileChooser fileChooser = new FileChooser();
-
-            // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()), 
-                    '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
-            fileChooser.getExtensionFilters().add(extFilter);
-
-            File file = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
-
-            // create and write to new file if file is NOT null
-            try (FileWriter fileWriter = new FileWriter(file)) {
-                // write contents of textArea to file
-                fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
-            } catch (Exception e) {
+            try {
+                saveWithDialog();
+            } catch (IOException e) {
                 throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
             }
         } else if (confirmationDialog.getSelectedOption() == Option.CANCEL) {
@@ -127,5 +124,30 @@ public final class AppActions implements ActionComponent {
         }
         // return true for both YES and NO button clicks
         return true;
+    }
+    
+    /**
+     * This helper method produces a Save As...Prompt and allows the user to save data to a file.
+     * @throws IOException 
+     */
+    private void saveWithDialog() throws IOException {
+        PropertyManager manager = applicationTemplate.manager;
+        
+        FileChooser fileChooser = new FileChooser();
+
+        // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
+                '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        File file = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+
+        // create and write to new file if file is NOT null
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            // write contents of textArea to file
+            fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
+        } catch (Exception e) {
+            throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
+        }
     }
 }
