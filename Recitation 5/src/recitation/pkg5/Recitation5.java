@@ -39,8 +39,24 @@ public class Recitation5 extends Application {
         series.getData().add(new XYChart.Data(11, 29));
         series.getData().add(new XYChart.Data(12, 25));
         
+        XYChart.Series series2 = new XYChart.Series();
+        series2.setName("My portfolio 2");
+        
+        series2.getData().add(new XYChart.Data(1, 25));
+        series2.getData().add(new XYChart.Data(2, 16));
+        series2.getData().add(new XYChart.Data(3, 17));
+        series2.getData().add(new XYChart.Data(4, 26));
+        series2.getData().add(new XYChart.Data(5, 36));
+        series2.getData().add(new XYChart.Data(6, 34));
+        series2.getData().add(new XYChart.Data(7, 20));
+        series2.getData().add(new XYChart.Data(8, 43));
+        series2.getData().add(new XYChart.Data(9, 44));
+        series2.getData().add(new XYChart.Data(10, 11));
+        series2.getData().add(new XYChart.Data(11, 20));
+        series2.getData().add(new XYChart.Data(12, 29));
+        
         Scene scene = new Scene(lineChart, 800, 600);
-        lineChart.getData().add(series);
+        lineChart.getData().addAll(series, series2);
 
         primaryStage.setScene(scene);
         primaryStage.show();
