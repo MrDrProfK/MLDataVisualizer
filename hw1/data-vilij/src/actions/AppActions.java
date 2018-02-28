@@ -28,7 +28,7 @@ public final class AppActions implements ActionComponent {
      * The application to which this class of actions belongs.
      */
     private ApplicationTemplate applicationTemplate;
-
+    
     /**
      * Path to the data file currently active.
      */
@@ -45,6 +45,7 @@ public final class AppActions implements ActionComponent {
         try {
             if (promptToSave()) {
                 applicationTemplate.getUIComponent().clear();
+                dataFilePath = null;
             }
         } catch (IOException promptException) {
             PropertyManager manager = applicationTemplate.manager;
@@ -140,10 +141,13 @@ public final class AppActions implements ActionComponent {
                 '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
         fileChooser.getExtensionFilters().add(extFilter);
 
-        File file = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+        // only present Save As...Prompt if data has NOT been previously saved to a specified path
+        if (dataFilePath == null) {
+            dataFilePath = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
+        }
 
         // create and write to new file if file is NOT null
-        try (FileWriter fileWriter = new FileWriter(file)) {
+        try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
             // write contents of textArea to file
             fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
         } catch (Exception e) {
