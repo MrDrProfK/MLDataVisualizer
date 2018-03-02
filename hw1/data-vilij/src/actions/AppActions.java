@@ -1,6 +1,6 @@
 package actions;
 
-import java.io.File;
+import dataprocessors.AppData;
 import java.io.FileWriter;
 import vilij.components.ActionComponent;
 import vilij.templates.ApplicationTemplate;
@@ -57,20 +57,47 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleSaveRequest() {
         // TODO for homework 2
-        // try to prompt user to Save as...
+        PropertyManager manager = applicationTemplate.manager;
+
+        FileChooser fileChooser = new FileChooser();
+
+        // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
+                '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
+        fileChooser.getExtensionFilters().add(extFilter);
+
         try {
-            saveWithDialog();
-            ((AppUI) applicationTemplate.getUIComponent()).disableSaveButton();
-        } catch (IOException promptException) {
-            PropertyManager manager = applicationTemplate.manager;
-            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
+            // only present Save As...Prompt if data has NOT been previously saved to a specified path
+            if (dataFilePath == null) {
+                dataFilePath = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
+            }
+
+            ((AppData) (applicationTemplate.getDataComponent())).saveData(dataFilePath);
+            
+        } catch (NullPointerException npe) {
+            // do nothing. save was aborted by user.
         }
     }
 
     @Override
     public void handleLoadRequest() {
         // TODO for homework 2
+        PropertyManager manager = applicationTemplate.manager;
+        FileChooser fileChooser = new FileChooser();
+
+        // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
+                '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        try {
+            // present open file dialog
+            dataFilePath = fileChooser.showOpenDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
+            ((AppData) (applicationTemplate.getDataComponent())).loadData(dataFilePath);
+
+        } catch (NullPointerException npe) {
+            // do nothing. save was aborted by user.
+        }
     }
 
     @Override
@@ -108,16 +135,36 @@ public final class AppActions implements ActionComponent {
     private boolean promptToSave() throws IOException {
         // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
-        
-        ConfirmationDialog confirmationDialog = (ConfirmationDialog)applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
+
+        ConfirmationDialog confirmationDialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
         confirmationDialog.show(manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()), manager.getPropertyValue(SAVE_UNSAVED_WORK.name()));
-        
+
         // analyze the dialog button clicked
         if (confirmationDialog.getSelectedOption() == Option.YES) {
+
+            FileChooser fileChooser = new FileChooser();
+
+            // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
+                    '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
+            fileChooser.getExtensionFilters().add(extFilter);
+
             try {
-                saveWithDialog();
-            } catch (IOException e) {
-                throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
+                // only present Save As...Prompt if data has NOT been previously saved to a specified path
+                if (dataFilePath == null) {
+                    dataFilePath = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
+                }
+
+                // create and write to new file if file is NOT null
+                try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
+                    // write contents of textArea to file
+                    fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
+                } catch (Exception e) {
+                    throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
+                }
+            } catch (NullPointerException npe) {
+                // saving was aborted by user
+                throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), npe);
             }
         } else if (confirmationDialog.getSelectedOption() == Option.CANCEL) {
             // return false for CANCEL button click
@@ -125,33 +172,5 @@ public final class AppActions implements ActionComponent {
         }
         // return true for both YES and NO button clicks
         return true;
-    }
-    
-    /**
-     * This helper method produces a Save As...Prompt and allows the user to save data to a file.
-     * @throws IOException 
-     */
-    private void saveWithDialog() throws IOException {
-        PropertyManager manager = applicationTemplate.manager;
-        
-        FileChooser fileChooser = new FileChooser();
-
-        // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
-                '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
-        fileChooser.getExtensionFilters().add(extFilter);
-
-        // only present Save As...Prompt if data has NOT been previously saved to a specified path
-        if (dataFilePath == null) {
-            dataFilePath = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
-        }
-
-        // create and write to new file if file is NOT null
-        try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
-            // write contents of textArea to file
-            fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
-        } catch (Exception e) {
-            throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
-        }
     }
 }
