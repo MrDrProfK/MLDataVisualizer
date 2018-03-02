@@ -175,13 +175,9 @@ public final class AppUI extends UITemplate {
                 saveButton.setDisable(true);
                 // no new data to be displayed as there is NO DATA in textArea
                 hasNewText = false;
-                // if a newline character exists in the contents of textArea
-                // (at least one line exists and has been terminated)...
-            } else if (textArea.getText().indexOf('\n') != -1) {
-                // enable the new and save buttons
+            } else {
                 newButton.setDisable(false);
                 saveButton.setDisable(false);
-            } else {
                 // new data that can potentially be displayed, by virtue of there being a newly typed character
                 hasNewText = true;
             }
