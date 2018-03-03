@@ -1,3 +1,4 @@
+// Aaron Knoll
 package actions;
 
 import dataprocessors.AppData;
@@ -102,7 +103,6 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleExitRequest() {
-        // TODO for homework 1
         Platform.exit();
     }
 

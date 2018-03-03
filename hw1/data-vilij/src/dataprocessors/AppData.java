@@ -1,3 +1,4 @@
+// Aaron Knoll
 package dataprocessors;
 
 import java.io.BufferedReader;
@@ -9,6 +10,7 @@ import vilij.components.DataComponent;
 import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import static settings.AppPropertyTypes.*;
 import vilij.components.Dialog;
 import vilij.propertymanager.PropertyManager;
@@ -34,19 +36,36 @@ public class AppData implements DataComponent {
     @Override
     public void loadData(Path dataFilePath) {
         // TODO for homework 2
-        
         try{
             // load data from file if file is NOT null
             FileReader fileReader = new FileReader(dataFilePath.toFile());
             try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                // read contents of loaded file line by line
-                String inputFromFile;
-                while((inputFromFile = bufferedReader.readLine()) != null) {
-                    System.out.println(inputFromFile);
+                // read contents of loaded file line by line and store them in an ArrayList
+                String singleLineInput;
+                ArrayList<String> dataByLine = new ArrayList<>();
+                
+                while((singleLineInput = bufferedReader.readLine()) != null) {
+                    dataByLine.add(singleLineInput);
                 }
-//                ((AppUI) applicationTemplate.getUIComponent()).getTextAreaData();
+                
+                ((AppUI) applicationTemplate.getUIComponent()).setTextAreaData(dataByLine);
+                // TODO: replace hard-coded strings
+                if(dataByLine.size()>10){
+                    applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                        .show("Data Loaded Successfully",
+                              "Loaded data consists of " 
+                                      + dataByLine.size()
+                                      + " line(s). Showing the first 10 in the text area.");
+                }else{
+                    applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                        .show("Data Loaded Successfully",
+                              "Loaded data consists of " 
+                                      + dataByLine.size()
+                                      + " line(s).");
+                }
             }
         } catch (Exception ex) {
+            // TODO: create appropriate Dialog Box
             System.out.println(ex);
 //            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
 //                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());

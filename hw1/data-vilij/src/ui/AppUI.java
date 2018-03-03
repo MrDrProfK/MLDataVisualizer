@@ -1,8 +1,11 @@
+// Aaron Knoll
 package ui;
 
 import actions.AppActions;
 import dataprocessors.AppData;
 import static java.io.File.separator;
+import java.util.ArrayList;
+import java.util.ListIterator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
@@ -41,7 +44,9 @@ public final class AppUI extends UITemplate {
     private boolean hasNewText;                 // whether or not the text area has any new data since last display
 
     private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
-
+    private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
+    private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
+    
     public ScatterChart<Number, Number> getChart() {
         return chart;
     }
@@ -181,6 +186,14 @@ public final class AppUI extends UITemplate {
                 // new data that can potentially be displayed, by virtue of there being a newly typed character
                 hasNewText = true;
             }
+            // print # lines of data in TextArea (for debugging purposes)
+//            System.out.println(textArea.getText().split("\n", -1).length);
+            ListIterator<String> itr = restOfTheLines.listIterator();
+            
+            while (textArea.getText().split("\n", -1).length < 10 && itr.hasNext()) {
+                    textArea.appendText("\n" + itr.next());
+                    itr.remove();
+            }
         });
     }
 
@@ -192,6 +205,42 @@ public final class AppUI extends UITemplate {
      */
     public String getTextAreaData() {
         return textArea.getText().trim();
+    }
+
+    /**
+     * Setter method used to populate the TextArea.
+     * 
+     * @param dataLoadedFromFile    data from loaded file
+     * 
+     */
+    public void setTextAreaData(ArrayList<String> dataLoadedFromFile){
+        firstTenLines = new ArrayList<>();
+        restOfTheLines = new ArrayList<>();
+
+        ListIterator<String> fileDataItr = dataLoadedFromFile.listIterator();
+        if (dataLoadedFromFile.size() > 10) {
+            for (int i = 0; i < 10; i++) {
+                firstTenLines.add(fileDataItr.next());
+            }
+            while (fileDataItr.hasNext()) {
+                restOfTheLines.add(fileDataItr.next());
+            }
+        } else {
+            while (fileDataItr.hasNext()) {
+                firstTenLines.add(fileDataItr.next());
+            }
+        }
+        textArea.clear();
+        ListIterator<String> itr = firstTenLines.listIterator();
+        int i = 0;
+        while (itr.hasNext()) {
+            if (i < 9) {
+                textArea.appendText(itr.next() + "\n");
+            } else {
+                textArea.appendText(itr.next());
+            }
+            i++;
+        }
     }
 
     /**
