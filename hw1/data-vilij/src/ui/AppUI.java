@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
@@ -46,6 +47,7 @@ public final class AppUI extends UITemplate {
     private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
     private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
+    private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
     
     public ScatterChart<Number, Number> getChart() {
         return chart;
@@ -117,12 +119,14 @@ public final class AppUI extends UITemplate {
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         textArea = new TextArea();
         displayButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
+        readOnlyCheckBox = new CheckBox("Read-Only");
+        readOnlyCheckBox.setIndeterminate(false);
 
         // create first column
         VBox vbox0 = new VBox();
         vbox0.setPrefWidth(windowWidth * .35);
         // add elements to first column
-        vbox0.getChildren().addAll(dataFileLabel, textArea, displayButton);
+        vbox0.getChildren().addAll(dataFileLabel, textArea, readOnlyCheckBox, displayButton);
         // align and space UI objects within the column
         vbox0.setAlignment(Pos.TOP_CENTER);
         vbox0.setSpacing(10);
@@ -156,6 +160,14 @@ public final class AppUI extends UITemplate {
         // TODO for homework 1
         hasNewText = false;
 
+        readOnlyCheckBox.setOnAction(e -> {
+            if(readOnlyCheckBox.isSelected()){
+                textArea.setDisable(true);
+            }else{
+                textArea.setDisable(false);
+            }
+        });
+        
         // when display button is clicked...
         displayButton.setOnAction(e -> {
             if (hasNewText) {
