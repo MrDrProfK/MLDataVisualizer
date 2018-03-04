@@ -11,6 +11,7 @@ import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.ListIterator;
 import static settings.AppPropertyTypes.*;
 import vilij.components.Dialog;
 import vilij.propertymanager.PropertyManager;
@@ -36,32 +37,41 @@ public class AppData implements DataComponent {
     @Override
     public void loadData(Path dataFilePath) {
         // TODO for homework 2
+        PropertyManager manager = applicationTemplate.manager;
+        
         try{
             // load data from file if file is NOT null
             FileReader fileReader = new FileReader(dataFilePath.toFile());
             try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
                 // read contents of loaded file line by line and store them in an ArrayList
-                String singleLineInput;
+                String singleLineInput, strToBeProcessed = "";
                 ArrayList<String> dataByLine = new ArrayList<>();
-                
-                while((singleLineInput = bufferedReader.readLine()) != null) {
+
+                while ((singleLineInput = bufferedReader.readLine()) != null) {
                     dataByLine.add(singleLineInput);
+                    strToBeProcessed += singleLineInput + "\n";
                 }
-                
-                ((AppUI) applicationTemplate.getUIComponent()).setTextAreaData(dataByLine);
-                // TODO: replace hard-coded strings
-                if(dataByLine.size()>10){
+
+                if (processor.getErrorLineNumber(strToBeProcessed) != -1) {
                     applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                        .show("Data Loaded Successfully",
-                              "Loaded data consists of " 
-                                      + dataByLine.size()
-                                      + " line(s). Showing the first 10 in the text area.");
-                }else{
-                    applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                        .show("Data Loaded Successfully",
-                              "Loaded data consists of " 
-                                      + dataByLine.size()
-                                      + " line(s).");
+                            .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
+                                    manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
+                } else {
+                    ((AppUI) applicationTemplate.getUIComponent()).setTextAreaData(dataByLine);
+                    // TODO: replace hard-coded strings
+                    if (dataByLine.size() > 10) {
+                        applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                                .show("Data Loaded Successfully",
+                                        "Loaded data consists of "
+                                        + dataByLine.size()
+                                        + " line(s). Showing the first 10 in the text area.");
+                    } else {
+                        applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                                .show("Data Loaded Successfully",
+                                        "Loaded data consists of "
+                                        + dataByLine.size()
+                                        + " line(s).");
+                    }
                 }
             }
         } catch (Exception ex) {
