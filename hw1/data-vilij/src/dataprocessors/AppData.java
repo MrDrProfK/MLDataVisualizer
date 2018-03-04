@@ -75,13 +75,16 @@ public class AppData implements DataComponent {
     public void loadData(String dataString) {
         // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
-        try {
-            processor.processString(dataString);
-        } catch (Exception ex) {
+        if (processor.getErrorLineNumber(dataString) != -1) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                    .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()), 
+                    .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
                             manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
+        } else {
+            // plot data
+            displayData();
         }
+        // clear data from data processor (maybe optional???)
+        clear();
     }
 
     @Override

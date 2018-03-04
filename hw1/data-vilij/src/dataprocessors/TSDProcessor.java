@@ -93,4 +93,30 @@ public final class TSDProcessor {
             throw new InvalidDataNameException(name);
         return name;
     }
+    
+    /**
+     * Checks data for improper formatting/errors.
+     * 
+     * @param str   data to be analyzed
+     * @return      the line number corresponding to data improperly formatted
+     *              or -1 if no formatting errors are found.
+     */
+    public int getErrorLineNumber(String str){
+        ArrayList<String> dataToBeCheckedForErrors = new ArrayList<>(Arrays.asList(str.split("\n")));
+        ListIterator<String> itr = dataToBeCheckedForErrors.listIterator();
+        
+        int lineCounter = 1;
+        try {
+            while (itr.hasNext()) {
+                processString(itr.next());
+                lineCounter++;
+            }
+        } catch (Exception ex) {
+            // temp soln for debugging
+            System.out.println("Error on line #" + lineCounter + ".");
+            return lineCounter;
+        }
+
+        return -1;
+    }
 }

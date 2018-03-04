@@ -109,6 +109,9 @@ public final class AppUI extends UITemplate {
         disableSaveButton();
         // no new data to be displayed as there is NO DATA in textArea
         hasNewText = false;
+        // clear data contained in the ArrayLists
+        firstTenLines = null;
+        restOfTheLines = null;
     }
 
     private void layout() {
@@ -173,15 +176,20 @@ public final class AppUI extends UITemplate {
             if (hasNewText) {
                 // clear scatter chart immediately before plotting new data
                 chart.getData().clear();
-                // load data from textArea into the data processor...
-                ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
-                // and plot data
-                ((AppData) applicationTemplate.getDataComponent()).displayData();
-                // clear data from data processor (maybe optional???)
-                ((AppData) applicationTemplate.getDataComponent()).clear();
+
+                String strToBeProcessed = textArea.getText();
+                if (restOfTheLines != null) {
+
+                    ListIterator<String> itr = restOfTheLines.listIterator();
+                    while (itr.hasNext()) {
+                        strToBeProcessed += "\n" + itr.next();
+                    }
+
+                }
+                // load data into the data processor...
+                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
                 hasNewText = false;
             }
-
         });
 
         textArea.setOnKeyReleased(e -> {
@@ -200,12 +208,17 @@ public final class AppUI extends UITemplate {
             }
             // print # lines of data in TextArea (for debugging purposes)
 //            System.out.println(textArea.getText().split("\n", -1).length);
-            ListIterator<String> itr = restOfTheLines.listIterator();
             
-            while (textArea.getText().split("\n", -1).length < 10 && itr.hasNext()) {
+            // TODO: REVISIT LATER!!!
+            if(restOfTheLines != null) {
+                ListIterator<String> itr = restOfTheLines.listIterator();
+
+                while (textArea.getText().split("\n", -1).length < 10 && itr.hasNext()) {
                     textArea.appendText("\n" + itr.next());
                     itr.remove();
+                }
             }
+            
         });
     }
 
@@ -255,6 +268,7 @@ public final class AppUI extends UITemplate {
         }
         if (!textArea.getText().trim().isEmpty()) {
             newButton.setDisable(false);
+            hasNewText = true;
         }
         disableSaveButton();
     }
