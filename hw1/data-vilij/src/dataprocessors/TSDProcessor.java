@@ -25,7 +25,16 @@ public final class TSDProcessor {
         private static final String NAME_ERROR_MSG = "All data instance names must start with the @ character.";
 
         public InvalidDataNameException(String name) {
-            super(String.format("Invalid name '%s'." + NAME_ERROR_MSG, name));
+            super(String.format("Invalid name '%s'. " + NAME_ERROR_MSG, name));
+        }
+    }
+
+    public static class DuplicateInstanceNameException extends Exception {
+
+        private static final String NAME_ERROR_MSG = "No duplicate instance names are permitted.";
+
+        public DuplicateInstanceNameException(String name) {
+            super(String.format("Duplicate instance name '%s' found. " + NAME_ERROR_MSG, name));
         }
     }
 
@@ -44,26 +53,30 @@ public final class TSDProcessor {
      * @throws Exception if the input string does not follow the <code>.tsd</code> data format
      */
     public void processString(String tsdString) throws Exception {
-        AtomicBoolean hadAnError   = new AtomicBoolean(false);
+        AtomicBoolean hadAnError = new AtomicBoolean(false);
         StringBuilder errorMessage = new StringBuilder();
         Stream.of(tsdString.split("\n"))
-              .map(line -> Arrays.asList(line.split("\t")))
-              .forEach(list -> {
-                  try {
-                      String   name  = checkedname(list.get(0));
-                      String   label = list.get(1);
-                      String[] pair  = list.get(2).split(",");
-                      Point2D  point = new Point2D(Double.parseDouble(pair[0]), Double.parseDouble(pair[1]));
-                      dataLabels.put(name, label);
-                      dataPoints.put(name, point);
-                  } catch (Exception e) {
-                      errorMessage.setLength(0);
-                      errorMessage.append(e.getClass().getSimpleName()).append(": ").append(e.getMessage());
-                      hadAnError.set(true);
-                  }
-              });
-        if (errorMessage.length() > 0)
+                .map(line -> Arrays.asList(line.split("\t")))
+                .forEach(list -> {
+                    try {
+                        String name = checkedname(list.get(0));
+                        String label = list.get(1);
+                        String[] pair = list.get(2).split(",");
+                        Point2D point = new Point2D(Double.parseDouble(pair[0]), Double.parseDouble(pair[1]));
+                        if (dataLabels.containsKey(name)) {
+                            throw new DuplicateInstanceNameException(name);
+                        }
+                        dataLabels.put(name, label);
+                        dataPoints.put(name, point);
+                    } catch (Exception e) {
+                        errorMessage.setLength(0);
+                        errorMessage.append(e.getClass().getSimpleName()).append(": ").append(e.getMessage());
+                        hadAnError.set(true);
+                    }
+                });
+        if (errorMessage.length() > 0) {
             throw new Exception(errorMessage.toString());
+        }
     }
 
     /**
@@ -101,21 +114,24 @@ public final class TSDProcessor {
      * @param str   data to be analyzed
      * @return      the line number corresponding to data improperly formatted
      *              or -1 if no formatting errors are found.
+     * @throws java.lang.Exception
      */
-    public int getErrorLineNumber(String str){
+    public int getErrorLineNumber(String str) throws Exception {
         ArrayList<String> dataToBeCheckedForErrors = new ArrayList<>(Arrays.asList(str.split("\n")));
         ListIterator<String> itr = dataToBeCheckedForErrors.listIterator();
-        
+
         int lineCounter = 1;
         try {
             while (itr.hasNext()) {
                 processString(itr.next());
                 lineCounter++;
             }
-        } catch (Exception ex) {
-            // temp soln for debugging
-            System.out.println("Error on line #" + lineCounter + ".");
-            return lineCounter;
+        } catch(Exception ex){
+            if(ex.getMessage().contains("DuplicateInstanceNameException")){
+                throw new Exception(ex.getMessage().split(": ", 2)[1]);
+            }else{
+                throw new Exception("Error on line #" + lineCounter + ".\nData must conform to the Tab-Separated Format. For example:\n@InstanceName[TAB Press]Label[TAB Press]X-Coord,Y-Coord");
+            }
         }
 
         return -1;
