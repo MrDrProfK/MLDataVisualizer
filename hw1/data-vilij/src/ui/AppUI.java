@@ -48,7 +48,7 @@ public final class AppUI extends UITemplate {
     private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
     private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
-    
+
     public ScatterChart<Number, Number> getChart() {
         return chart;
     }
@@ -104,6 +104,8 @@ public final class AppUI extends UITemplate {
         // clear contents of textArea and scatter chart
         textArea.clear();
         chart.getData().clear();
+        // DO NOT allow the user to take a screenshot of an empty chart
+        scrnshotButton.setDisable(true);
         // disable new and save buttons upon clearing textArea and chart
         newButton.setDisable(true);
         disableSaveButton();
@@ -164,18 +166,20 @@ public final class AppUI extends UITemplate {
         hasNewText = false;
 
         readOnlyCheckBox.setOnAction(e -> {
-            if(readOnlyCheckBox.isSelected()){
+            if (readOnlyCheckBox.isSelected()) {
                 textArea.setDisable(true);
-            }else{
+            } else {
                 textArea.setDisable(false);
             }
         });
-        
+
         // when display button is clicked...
         displayButton.setOnAction(e -> {
             if (hasNewText) {
                 // clear scatter chart immediately before plotting new data
                 chart.getData().clear();
+                // DO NOT allow the user to take a screenshot of an empty chart
+                scrnshotButton.setDisable(true);
 
                 String strToBeProcessed = textArea.getText();
                 if (restOfTheLines != null) {
@@ -188,6 +192,11 @@ public final class AppUI extends UITemplate {
                 }
                 // load data into the data processor...
                 ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
+                // if data is plotted...
+                if (!chart.getData().isEmpty()) {
+                    // allow the user to take a screenshot of the chart
+                    scrnshotButton.setDisable(false);
+                }
                 hasNewText = false;
             }
         });
@@ -208,9 +217,9 @@ public final class AppUI extends UITemplate {
             }
             // print # lines of data in TextArea (for debugging purposes)
 //            System.out.println(textArea.getText().split("\n", -1).length);
-            
+
             // TODO: REVISIT LATER!!!
-            if(restOfTheLines != null) {
+            if (restOfTheLines != null) {
                 ListIterator<String> itr = restOfTheLines.listIterator();
 
                 while (textArea.getText().split("\n", -1).length < 10 && itr.hasNext()) {
@@ -218,7 +227,7 @@ public final class AppUI extends UITemplate {
                     itr.remove();
                 }
             }
-            
+
         });
     }
 
@@ -234,11 +243,11 @@ public final class AppUI extends UITemplate {
 
     /**
      * Setter method used to populate the TextArea.
-     * 
-     * @param dataLoadedFromFile    data from loaded file
-     * 
+     *
+     * @param dataLoadedFromFile data from loaded file
+     *
      */
-    public void setTextAreaData(ArrayList<String> dataLoadedFromFile){
+    public void setTextAreaData(ArrayList<String> dataLoadedFromFile) {
         firstTenLines = new ArrayList<>();
         restOfTheLines = new ArrayList<>();
 
@@ -275,7 +284,7 @@ public final class AppUI extends UITemplate {
 
     /**
      * Setter method used to disable saveButton.
-     * 
+     *
      */
     public void disableSaveButton() {
         saveButton.setDisable(true);
