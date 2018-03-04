@@ -11,7 +11,6 @@ import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.ListIterator;
 import static settings.AppPropertyTypes.*;
 import vilij.components.Dialog;
 import vilij.propertymanager.PropertyManager;
@@ -76,24 +75,32 @@ public class AppData implements DataComponent {
             }
         } catch (Exception ex) {
             // TODO: create appropriate Dialog Box
-            System.out.println(ex);
-//            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-//                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
+            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                    .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
+                            ex.getMessage());
         }
+        // clear data from data processor
+        clear();
     }
 
     public void loadData(String dataString) {
         // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
-        if (processor.getErrorLineNumber(dataString) != -1) {
+        try {
+            if (processor.getErrorLineNumber(dataString) != -1) {
+                applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                        .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
+                                manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
+            } else {
+                // plot data
+                displayData();
+            }
+        } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
                     .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
-                            manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
-        } else {
-            // plot data
-            displayData();
+                            ex.getMessage());
         }
-        // clear data from data processor (maybe optional???)
+        // clear data from data processor
         clear();
     }
 
@@ -101,17 +108,31 @@ public class AppData implements DataComponent {
     public void saveData(Path dataFilePath) {
         // TODO for homework 2
         PropertyManager manager = applicationTemplate.manager;
-        
-        // create and write to new file if file is NOT null
-        try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
-            // write contents of textArea to file
-            fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
-            ((AppUI) applicationTemplate.getUIComponent()).disableSaveButton();
-        } catch (IOException promptException) {
-            // catch exception if write operation doesn't work as expected
+        String strToBeProcessed = ((AppUI) applicationTemplate.getUIComponent()).getTextAreaData();
+        try {
+            if (processor.getErrorLineNumber(strToBeProcessed) != -1) {
+                applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                        .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()),
+                                manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
+            } else {
+                // create and write to new file if file is NOT null
+                try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
+                    // write contents of textArea to file
+                    fileWriter.write(strToBeProcessed);
+                    ((AppUI) applicationTemplate.getUIComponent()).disableSaveButton();
+                } catch (IOException promptException) {
+                    // catch exception if write operation doesn't work as expected
+                    applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                            .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()));
+                }
+            }
+        } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()));
+                        .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()),
+                                ex.getMessage());
         }
+        // clear data from data processor
+        clear();
     }
 
     @Override
