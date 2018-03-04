@@ -253,6 +253,10 @@ public final class AppUI extends UITemplate {
             }
             i++;
         }
+        if (!textArea.getText().trim().isEmpty()) {
+            newButton.setDisable(false);
+        }
+        disableSaveButton();
     }
 
     /**
