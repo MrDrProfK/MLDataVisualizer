@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.ListIterator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -39,7 +39,9 @@ public final class AppUI extends UITemplate {
 
     @SuppressWarnings("FieldCanBeLocal")
     private Button scrnshotButton;              // toolbar button to take a screenshot of the data
-    private ScatterChart<Number, Number> chart; // the chart where data will be displayed
+//    private ScatterChart<Number, Number> chart; // the chart where data will be displayed
+    private LineChart<Number, Number> chart; // the chart where data will be displayed (LineChart version of original chart)
+
     private Button displayButton;               // workspace button to display data on the chart
     private TextArea textArea;                  // text area for new data input
     private boolean hasNewText;                 // whether or not the text area has any new data since last display
@@ -49,7 +51,8 @@ public final class AppUI extends UITemplate {
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
     private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
 
-    public ScatterChart<Number, Number> getChart() {
+//    public ScatterChart<Number, Number> getChart() {
+    public LineChart<Number, Number> getChart() {
         return chart;
     }
 
@@ -66,7 +69,6 @@ public final class AppUI extends UITemplate {
         String iconsPath = "/" + String.join(separator,
                 manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
                 manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
-
         scrnshoticonPath = String.join(separator, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
     }
 
@@ -141,7 +143,8 @@ public final class AppUI extends UITemplate {
         Label dataVisLabel = new Label(manager.getPropertyValue(GRAPH_LABEL_TEXT.name()));
         dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         // initialize new scatter chart with unspecified axis ranges/tick values for automatic scaling
-        chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
+//        chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
+        chart = new LineChart<>(new NumberAxis(), new NumberAxis());
 
         // create second column
         VBox vbox1 = new VBox();
@@ -159,6 +162,10 @@ public final class AppUI extends UITemplate {
 
         // add the pane containing both columns to inside of pre-existing VBox root pane
         appPane.getChildren().add(hbox);
+        
+        // add custom style to application .add("gui/css/data-vilij.css")
+        super.getPrimaryScene().getStylesheets().add("gui/css/data-vilij.css");
+        System.out.println(super.getPrimaryScene().getStylesheets());
     }
 
     private void setWorkspaceActions() {
