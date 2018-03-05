@@ -7,6 +7,8 @@ import javafx.scene.chart.XYChart;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
+import javafx.scene.Cursor;
+import javafx.scene.control.Tooltip;
 
 /**
  * The data files used by this data visualization applications follow a tab-separated format, where each data point is
@@ -94,6 +96,33 @@ public final class TSDProcessor {
                 series.getData().add(new XYChart.Data<>(point.getX(), point.getY()));
             });
             chart.getData().add(series);
+        }
+        
+    }
+    
+        /**
+     * Exports the data to the specified 2-D chart.
+     *
+     * @param chart the specified chart
+     */
+    void displayInstanceNamesWhenHovering(XYChart<Number, Number> chart) {
+        for (XYChart.Series<Number, Number> series : chart.getData()) {
+            for (XYChart.Data<Number, Number> pts : series.getData()) {
+                Iterator itr = dataPoints.entrySet().iterator();
+                while (itr.hasNext()) {
+                    Map.Entry pair = (Map.Entry) itr.next();
+                    Tooltip.install(pts.getNode(), new Tooltip(pair.getKey().toString()));
+                    if (((Point2D) pair.getValue()).getX() == pts.getXValue().doubleValue()
+                            && ((Point2D) pair.getValue()).getY() == pts.getYValue().doubleValue()) {
+                        Tooltip toolTip = new Tooltip(pair.getKey().toString());
+//                        toolTip.getScene().cursorProperty().bind(Cursor.CROSSHAIR);
+                        Tooltip.install(pts.getNode(), new Tooltip(pair.getKey().toString()));
+                        break;
+                    }
+                }
+                
+            }
+//            System.out.println(series);
         }
     }
 

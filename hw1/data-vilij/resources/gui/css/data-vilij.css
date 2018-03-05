@@ -33,3 +33,7 @@ and open the template in the editor.
     -fx-stroke: #637040;
     -fx-stroke-width: 3; 
 }
+
+.tooltip{
+    -fx-cursor: crosshair;
+}

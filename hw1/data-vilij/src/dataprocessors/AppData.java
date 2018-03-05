@@ -142,5 +142,6 @@ public class AppData implements DataComponent {
 
     public void displayData() {
         processor.toChartData(((AppUI) applicationTemplate.getUIComponent()).getChart());
+        processor.displayInstanceNamesWhenHovering(((AppUI) applicationTemplate.getUIComponent()).getChart());
     }
 }
