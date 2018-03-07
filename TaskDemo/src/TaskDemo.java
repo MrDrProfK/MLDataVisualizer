@@ -1,4 +1,5 @@
 
+import java.util.ListIterator;
 import java.util.concurrent.locks.ReentrantLock;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -57,7 +58,6 @@ public class TaskDemo extends Application {
         Label myLabel = new Label(myName + " active");
         Button cancelButton = new Button("Cancel");
         cancelButton.setOnAction(e -> {
-//            System.out.println(task.getTitle());
             task.cancel();
             Alert cancelAlert = new Alert(AlertType.WARNING);
             cancelAlert.setHeaderText(null);
@@ -70,6 +70,7 @@ public class TaskDemo extends Application {
         children.add(cancelButton);
         children.add(progress);
         children.add(myLabel);
+        
         Platform.runLater(() -> {
             taskView.getItems().add(myPane);
         });
@@ -102,7 +103,10 @@ public class TaskDemo extends Application {
         } catch (InterruptedException x) {
             // EMPTY EXCEPTION HANDLERS ARE OFTEN A BAD IDEA!
         }
-        taskView.getItems().remove(myPane);
+        // run GUI modifications in a runLater() so the Application Thread can perform the action
+        Platform.runLater(() -> {
+            taskView.getItems().remove(myPane);
+        });
     }
 
     public static void main(String[] args) {
