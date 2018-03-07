@@ -70,6 +70,8 @@ public class TaskDemo extends Application {
             long time = (long) (Math.random() * 20000);
             for (long t = 0; t < time; t += 1) {
                 try {
+                    // update progress indicator using the fractional amount of elapsed time
+                    progress.setProgress((double) t / time);
                     // Perform a "banking transaction".
                     if (Math.random() >= 0.5) {
                         credits++;
