@@ -56,7 +56,14 @@ public class TaskDemo extends Application {
         String myName = Thread.currentThread().getName();
         Label myLabel = new Label(myName + " active");
         Button cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(e -> task.cancel());
+        cancelButton.setOnAction(e -> {
+//            System.out.println(task.getTitle());
+            task.cancel();
+            Alert cancelAlert = new Alert(AlertType.WARNING);
+            cancelAlert.setHeaderText(null);
+            cancelAlert.setContentText("Task Cancelled!");
+            cancelAlert.showAndWait();
+        });
         FlowPane myPane = new FlowPane();
         ProgressIndicator progress = new ProgressIndicator(0);
         ObservableList<Node> children = myPane.getChildren();
