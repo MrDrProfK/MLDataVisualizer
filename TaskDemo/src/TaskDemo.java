@@ -75,11 +75,15 @@ public class TaskDemo extends Application {
             taskView.getItems().add(myPane);
         });
         try {
-            long time = (long) (Math.random() * 20000);
+            final long time = (long) (Math.random() * 20000);
             for (long t = 0; t < time; t += 1) {
+                lock.lock();
                 try {
-                    // update progress indicator using the fractional amount of elapsed time
-                    progress.setProgress((double) t / time);
+                    final double d = (double) t / time;
+                    Platform.runLater(() -> {
+                        // update progress indicator using the fractional amount of elapsed time
+                        progress.setProgress(d);
+                    });
                     // Perform a "banking transaction".
                     if (Math.random() >= 0.5) {
                         credits++;
