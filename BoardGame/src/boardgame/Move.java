@@ -56,6 +56,27 @@ public abstract class Move {
     public String toString() {
         return this.getClass().getName() + "[" + getWho() + "]";
     }
+    
+    @Override
+    public boolean equals(Object otherObject) {
+        if (this == otherObject) {
+            return true;
+        }
+        if (otherObject == null) {
+            return false;
+        }
+        if (getClass() != otherObject.getClass()) {
+            return false;
+        }
+        //compare string representations of both objects
+        return this.toString().equals(((Move) otherObject).toString());
+    }
+
+    @Override
+    public int hashCode() {
+        // hash all fields and combine codes (typical remedy)
+        return who.hashCode() + board.hashCode();
+    }
 
     /**
      * Base class whose objects contain state information necessary in order to
