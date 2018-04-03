@@ -10,13 +10,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -141,6 +138,8 @@ public final class AppUI extends UITemplate {
         vbox0.setAlignment(Pos.TOP_CENTER);
         vbox0.setSpacing(10);
         vbox0.setPadding(new Insets(10, 0, 10, 20));
+        // Only the data visualization chart and the toolbar should be visible upon application startup
+        vbox0.setVisible(false);
 
         // declare/initialize UI objects to be included in the second column
         Label dataVisLabel = new Label(manager.getPropertyValue(GRAPH_LABEL_TEXT.name()));
@@ -167,8 +166,10 @@ public final class AppUI extends UITemplate {
         appPane.getChildren().add(hbox);
         
         // add custom style to application .add("gui/css/data-vilij.css")
-        super.getPrimaryScene().getStylesheets().add("gui/css/data-vilij.css");
-        System.out.println(super.getPrimaryScene().getStylesheets());
+        getPrimaryScene().getStylesheets().add("gui/css/data-vilij.css");
+//        super.getPrimaryScene().setCursor(Cursor.WAIT);
+//        getPrimaryScene().getRoot().setCursor(Cursor.WAIT);
+//        System.out.println(super.getPrimaryScene().getStylesheets());
     }
 
     private void setWorkspaceActions() {

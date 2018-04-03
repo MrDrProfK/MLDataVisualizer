@@ -1,13 +1,18 @@
 // Aaron Knoll
 package dataprocessors;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 import javafx.geometry.Point2D;
 import javafx.scene.chart.XYChart;
-
-import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
-import javafx.scene.Cursor;
 import javafx.scene.control.Tooltip;
 
 /**
@@ -115,8 +120,14 @@ public final class TSDProcessor {
                     if (((Point2D) pair.getValue()).getX() == pts.getXValue().doubleValue()
                             && ((Point2D) pair.getValue()).getY() == pts.getYValue().doubleValue()) {
                         Tooltip toolTip = new Tooltip(pair.getKey().toString());
-//                        toolTip.getScene().cursorProperty().bind(Cursor.CROSSHAIR);
-                        Tooltip.install(pts.getNode(), new Tooltip(pair.getKey().toString()));
+//                        toolTip.getScene().setCursor(Cursor.WAIT);
+                        pts.getNode().setOnMouseEntered(e->{
+//                            toolTip.getScene().setCursor(Cursor.WAIT);
+//                            chart.getScene().setCursor(Cursor.WAIT);
+                            System.out.println("in node");
+                            });
+                        
+                        Tooltip.install(pts.getNode(), toolTip);
                         break;
                     }
                 }
