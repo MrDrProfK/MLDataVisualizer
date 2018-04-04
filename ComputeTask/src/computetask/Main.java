@@ -61,7 +61,12 @@ public class Main extends Application {
             t.setDaemon(true);
             t.start();
         });
-        buttonBox.getChildren().add(piBtn);
+        
+        // create new button for the launch of a Mandelbrot Set Approximation
+        Button mandelbrotBtn = new Button();
+        mandelbrotBtn.setText("Mandelbrot");
+        
+        buttonBox.getChildren().addAll(piBtn, mandelbrotBtn);
         
         Button cancelBtn = new Button();
         cancelBtn.setText("Cancel");
