@@ -51,7 +51,8 @@ public final class AppUI extends UITemplate {
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
     private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
 
-//    public ScatterChart<Number, Number> getChart() {
+    private final VBox leftColumn = new VBox(); // create first column
+
     public LineChart<Number, Number> getChart() {
         return chart;
     }
@@ -78,6 +79,7 @@ public final class AppUI extends UITemplate {
         // utilize super class method call for all but the final toolBarButton
         super.setToolBar(applicationTemplate);
         PropertyManager manager = applicationTemplate.manager;
+        newButton.setDisable(false);
         // create screenshot toolBar button (and disable screenshot button initially)
         scrnshotButton = setToolbarButton(scrnshoticonPath, manager.getPropertyValue(SCREENSHOT_TOOLTIP.name()), true);
         // add screenshot toolBar button to list of pre-existing toolBar buttons on the toolBar
@@ -129,17 +131,15 @@ public final class AppUI extends UITemplate {
         readOnlyCheckBox = new CheckBox("Read-Only");
         readOnlyCheckBox.setIndeterminate(false);
 
-        // create first column
-        VBox vbox0 = new VBox();
-        vbox0.setPrefWidth(windowWidth * .35);
+        leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
-        vbox0.getChildren().addAll(dataFileLabel, textArea, readOnlyCheckBox, displayButton);
+        leftColumn.getChildren().addAll(dataFileLabel, textArea, readOnlyCheckBox, displayButton);
         // align and space UI objects within the column
-        vbox0.setAlignment(Pos.TOP_CENTER);
-        vbox0.setSpacing(10);
-        vbox0.setPadding(new Insets(10, 0, 10, 20));
+        leftColumn.setAlignment(Pos.TOP_CENTER);
+        leftColumn.setSpacing(10);
+        leftColumn.setPadding(new Insets(10, 0, 10, 20));
         // Only the data visualization chart and the toolbar should be visible upon application startup
-        vbox0.setVisible(false);
+        leftColumn.setVisible(false);
 
         // declare/initialize UI objects to be included in the second column
         Label dataVisLabel = new Label(manager.getPropertyValue(GRAPH_LABEL_TEXT.name()));
@@ -149,18 +149,18 @@ public final class AppUI extends UITemplate {
         chart = new LineChart<>(new NumberAxis(), new NumberAxis());
 
         // create second column
-        VBox vbox1 = new VBox();
-        vbox1.setPrefWidth(windowWidth * .65);
+        VBox rightColumn = new VBox();
+        rightColumn.setPrefWidth(windowWidth * .65);
         // add elements to second column
-        vbox1.getChildren().addAll(dataVisLabel, chart);
+        rightColumn.getChildren().addAll(dataVisLabel, chart);
         // align and space UI objects within the column
-        vbox1.setAlignment(Pos.TOP_CENTER);
-        vbox1.setPadding(new Insets(10, 20, 0, 0));
+        rightColumn.setAlignment(Pos.TOP_CENTER);
+        rightColumn.setPadding(new Insets(10, 20, 0, 0));
 
         // create a pane to hold both columns
         HBox hbox = new HBox();
-        // add both columns (vbox0 and vbox1) to the HBox pane
-        hbox.getChildren().addAll(vbox0, vbox1);
+        // add both columns (leftColumn and rightColumn) to the HBox pane
+        hbox.getChildren().addAll(leftColumn, rightColumn);
 
         // add the pane containing both columns to inside of pre-existing VBox root pane
         appPane.getChildren().add(hbox);
@@ -299,5 +299,20 @@ public final class AppUI extends UITemplate {
      */
     public void disableSaveButton() {
         saveButton.setDisable(true);
+    }
+    
+    /**
+     * Prepares the UI for new user-typed input.
+     */
+    public void prepareUIForUserTypedInput(){
+        leftColumn.setVisible(true);
+        newButton.setDisable(true);
+    }
+    
+    /**
+     * Prepares the UI for new input loaded from a file.
+     */
+    public void prepareUIForFileLoadedInput(){
+        leftColumn.setVisible(true);
     }
 }

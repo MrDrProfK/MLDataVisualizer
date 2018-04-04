@@ -34,24 +34,35 @@ public final class AppActions implements ActionComponent {
      * Path to the data file currently active.
      */
     Path dataFilePath;
+    
+    /**
+     * Path to the data file currently active.
+     */
+    private boolean firstNewRequest;
 
     public AppActions(ApplicationTemplate applicationTemplate) {
         this.applicationTemplate = applicationTemplate;
+        firstNewRequest = true;
     }
 
     @Override
     public void handleNewRequest() {
-        // TODO for homework 1
-        // try to prompt user to save current work before clearing and resetting data
-        try {
-            if (promptToSave()) {
-                applicationTemplate.getUIComponent().clear();
-                dataFilePath = null;
+        if(firstNewRequest) {
+            // show left column
+            ((AppUI) (applicationTemplate.getUIComponent())).prepareUIForUserTypedInput();
+            firstNewRequest = false;
+        } else {
+            // try to prompt user to save current work before clearing and resetting data
+            try {
+                if (!firstNewRequest && promptToSave()) {
+                    applicationTemplate.getUIComponent().clear();
+                    dataFilePath = null;
+                }
+            } catch (IOException promptException) {
+                PropertyManager manager = applicationTemplate.manager;
+                applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                        .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
             }
-        } catch (IOException promptException) {
-            PropertyManager manager = applicationTemplate.manager;
-            applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
         }
     }
 
