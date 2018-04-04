@@ -65,6 +65,23 @@ public class Main extends Application {
         // create new button for the launch of a Mandelbrot Set Approximation
         Button mandelbrotBtn = new Button();
         mandelbrotBtn.setText("Mandelbrot");
+        mandelbrotBtn.setOnAction(e -> {
+            if(task != null)
+                task.cancel();
+            task = new MandelbrotTask();
+            final ImageView currentMandelbrotImage = new ImageView();
+            root.setCenter(currentMandelbrotImage);
+
+            task.getPartialResultProperty().addListener
+                ((obs, os, ns) -> currentMandelbrotImage.setImage((Image)obs.getValue()));
+            task.messageProperty().addListener((obs, ov, nv) -> statusLabel.setText(nv));
+            task.progressProperty().addListener
+                ((obs, ov, nv) -> progressLabel.setText(((int)(nv.doubleValue() * 100)) + "% complete"));
+               
+            Thread t = new Thread(task);
+            t.setDaemon(true);
+            t.start();
+        });
         
         buttonBox.getChildren().addAll(piBtn, mandelbrotBtn);
         
@@ -72,6 +89,9 @@ public class Main extends Application {
         cancelBtn.setText("Cancel");
         cancelBtn.setOnAction(e -> cancelTask());
         buttonBox.getChildren().add(cancelBtn);
+        
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(700);
         
         Scene scene = new Scene(root);
         primaryStage.setTitle("Compute Task Demo");
