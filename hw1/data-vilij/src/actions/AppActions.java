@@ -36,7 +36,8 @@ public final class AppActions implements ActionComponent {
     Path dataFilePath;
     
     /**
-     * Path to the data file currently active.
+     * Indicates whether or not a new request is occurring for the first time
+     * since application startup
      */
     private boolean firstNewRequest;
 
@@ -47,6 +48,7 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleNewRequest() {
+        // if it's the first request to create new data since application startup...
         if(firstNewRequest) {
             // show left column
             ((AppUI) (applicationTemplate.getUIComponent())).prepareUIForUserTypedInput();
@@ -93,7 +95,6 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleLoadRequest() {
-        // TODO for homework 2
         PropertyManager manager = applicationTemplate.manager;
         FileChooser fileChooser = new FileChooser();
 
@@ -106,7 +107,8 @@ public final class AppActions implements ActionComponent {
             // present open file dialog
             dataFilePath = fileChooser.showOpenDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
             ((AppData) (applicationTemplate.getDataComponent())).loadData(dataFilePath);
-
+            
+            ((AppUI) (applicationTemplate.getUIComponent())).prepareUIForFileLoadedInput();
         } catch (NullPointerException npe) {
             // do nothing. save was aborted by user.
         }

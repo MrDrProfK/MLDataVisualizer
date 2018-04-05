@@ -11,9 +11,9 @@ import javafx.geometry.Pos;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -49,10 +49,13 @@ public final class AppUI extends UITemplate {
     private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
     private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
-    private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
+//    private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
 
+    private ToggleButton editToggle;            // toggle for edit/done functionality
     private final VBox leftColumn = new VBox(); // create first column
 
+    HBox editTogglePane = new HBox();
+    
     public LineChart<Number, Number> getChart() {
         return chart;
     }
@@ -126,14 +129,22 @@ public final class AppUI extends UITemplate {
         // declare/initialize UI objects to be included in the first column
         Label dataFileLabel = new Label(manager.getPropertyValue(DATA_FILE_LABEL_TEXT.name()));
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
+        dataFileLabel.setPadding(new Insets(0, 0, -35, 0));
         textArea = new TextArea();
         displayButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
-        readOnlyCheckBox = new CheckBox("Read-Only");
-        readOnlyCheckBox.setIndeterminate(false);
-
+//        readOnlyCheckBox = new CheckBox("Read-Only");
+//        readOnlyCheckBox.setIndeterminate(false);
+       
+        editToggle = new ToggleButton("Done");
+        editToggle.setSelected(true);
+        
+        editTogglePane.setPadding(new Insets(0, 0, -9, 0));
+        editTogglePane.setAlignment(Pos.CENTER_RIGHT);
+        editTogglePane.getChildren().add(editToggle);
+        
         leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
-        leftColumn.getChildren().addAll(dataFileLabel, textArea, readOnlyCheckBox, displayButton);
+        leftColumn.getChildren().addAll(dataFileLabel, editTogglePane, textArea, displayButton);
         // align and space UI objects within the column
         leftColumn.setAlignment(Pos.TOP_CENTER);
         leftColumn.setSpacing(10);
@@ -176,14 +187,16 @@ public final class AppUI extends UITemplate {
         // TODO for homework 1
         hasNewText = false;
 
-        readOnlyCheckBox.setOnAction(e -> {
-            if (readOnlyCheckBox.isSelected()) {
-                textArea.setDisable(true);
-            } else {
+        editToggle.setOnAction(e -> {
+            if (editToggle.isSelected()) {
                 textArea.setDisable(false);
+                editToggle.setText("Done");
+            } else {
+                textArea.setDisable(true);
+                editToggle.setText("Edit");
             }
         });
-        
+
         // when display button is clicked...
         displayButton.setOnAction(e -> {
             if (hasNewText) {
@@ -313,6 +326,8 @@ public final class AppUI extends UITemplate {
      * Prepares the UI for new input loaded from a file.
      */
     public void prepareUIForFileLoadedInput(){
+        editTogglePane.setVisible(false);
         leftColumn.setVisible(true);
+        textArea.setDisable(true);
     }
 }

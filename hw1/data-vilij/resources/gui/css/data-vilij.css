@@ -34,6 +34,9 @@ and open the template in the editor.
     -fx-stroke-width: 3; 
 }
 
+.text-area:disabled{
+    -fx-opacity: 1.0
+}
 /*.tooltip{
     -fx-cursor: crosshair;
 }*/
