@@ -9,14 +9,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -42,21 +46,20 @@ public final class AppUI extends UITemplate {
 
     @SuppressWarnings("FieldCanBeLocal")
     private Button scrnshotButton;              // toolbar button to take a screenshot of the data
-//    private ScatterChart<Number, Number> chart; // the chart where data will be displayed
-    private LineChart<Number, Number> chart; // the chart where data will be displayed (LineChart version of original chart)
+    private LineChart<Number, Number> chart;    // the chart where data will be displayed (LineChart version of original chart)
 
-    private Button displayButton;               // workspace button to display data on the chart
+    private Button runButton;                   // workspace button to display data on the chart
     private TextArea textArea;                  // text area for new data input
     private boolean hasNewText;                 // whether or not the text area has any new data since last display
 
     private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
     private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
-//    private CheckBox readOnlyCheckBox;          // used to indicate whether or not data is set to read-only
 
     private ToggleButton editToggle;            // toggle for edit/done functionality
     private final VBox leftColumn = new VBox(); // create first column
-
+    
+    private Label inputDataDetails;
     HBox editTogglePane = new HBox();
     
     public LineChart<Number, Number> getChart() {
@@ -81,7 +84,6 @@ public final class AppUI extends UITemplate {
 
     @Override
     protected void setToolBar(ApplicationTemplate applicationTemplate) {
-        // TODO for homework 1
         // utilize super class method call for all but the final toolBarButton
         super.setToolBar(applicationTemplate);
         PropertyManager manager = applicationTemplate.manager;
@@ -110,7 +112,6 @@ public final class AppUI extends UITemplate {
 
     @Override
     public void clear() {
-        // TODO for homework 1
         // clear contents of textArea and scatter chart
         textArea.clear();
         chart.getData().clear();
@@ -127,16 +128,14 @@ public final class AppUI extends UITemplate {
     }
 
     private void layout() {
-        // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
         // declare/initialize UI objects to be included in the first column
         Label dataFileLabel = new Label(manager.getPropertyValue(DATA_FILE_LABEL_TEXT.name()));
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         dataFileLabel.setPadding(new Insets(0, 0, -35, 0));
         textArea = new TextArea();
-        displayButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
-//        readOnlyCheckBox = new CheckBox("Read-Only");
-//        readOnlyCheckBox.setIndeterminate(false);
+        runButton = new Button("Run");
+//        runButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
        
         editToggle = new ToggleButton("Done");
         editToggle.setSelected(true);
@@ -145,9 +144,30 @@ public final class AppUI extends UITemplate {
         editTogglePane.setAlignment(Pos.CENTER_RIGHT);
         editTogglePane.getChildren().add(editToggle);
         
+        inputDataDetails = new Label();
+        inputDataDetails.setWrapText(true);
+
+        ChoiceBox selectAlgType = new ChoiceBox(FXCollections.observableArrayList("Algorithm Type", "Classification", "Clustering"));
+        selectAlgType.getSelectionModel().selectFirst();
+        
+        Label algTypeLabel = new Label();
+        algTypeLabel.setVisible(false);
+        ToggleGroup group = new ToggleGroup();
+
+        RadioButton alg1 = new RadioButton("Random Classification 1");
+        alg1.setToggleGroup(group);
+        alg1.setSelected(true);
+
+        RadioButton alg2 = new RadioButton("Random Classification 2");
+        alg2.setToggleGroup(group);
+
+//        ChoiceBox selectAlg = new ChoiceBox(FXCollections.observableArrayList("Algorithm", "Random Classification", "Random Clustering"));
+//        selectAlg.getSelectionModel().selectFirst();
+//        selectAlg.setVisible(false);
+        
         leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
-        leftColumn.getChildren().addAll(dataFileLabel, editTogglePane, textArea, displayButton);
+        leftColumn.getChildren().addAll(dataFileLabel, editTogglePane, textArea, inputDataDetails, selectAlgType, algTypeLabel, runButton);
         // align and space UI objects within the column
         leftColumn.setAlignment(Pos.TOP_CENTER);
         leftColumn.setSpacing(10);
@@ -159,7 +179,6 @@ public final class AppUI extends UITemplate {
         Label dataVisLabel = new Label(manager.getPropertyValue(GRAPH_LABEL_TEXT.name()));
         dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         // initialize new scatter chart with unspecified axis ranges/tick values for automatic scaling
-//        chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
         chart = new LineChart<>(new NumberAxis(), new NumberAxis());
 
         // create second column
@@ -179,7 +198,7 @@ public final class AppUI extends UITemplate {
         // add the pane containing both columns to inside of pre-existing VBox root pane
         appPane.getChildren().add(hbox);
         
-        // add custom style to application .add("gui/css/data-vilij.css")
+        // add custom style to application
         getPrimaryScene().getStylesheets().add("gui/css/data-vilij.css");
 //        super.getPrimaryScene().setCursor(Cursor.WAIT);
 //        getPrimaryScene().getRoot().setCursor(Cursor.WAIT);
@@ -187,7 +206,6 @@ public final class AppUI extends UITemplate {
     }
 
     private void setWorkspaceActions() {
-        // TODO for homework 1
         hasNewText = false;
 
         editToggle.setOnAction(e -> {
@@ -200,8 +218,8 @@ public final class AppUI extends UITemplate {
             }
         });
 
-        // when display button is clicked...
-        displayButton.setOnAction(e -> {
+        // when run button is clicked...
+        runButton.setOnAction(e -> {
             if (hasNewText) {
                 // clear scatter chart immediately before plotting new data
                 chart.getData().clear();
@@ -327,16 +345,15 @@ public final class AppUI extends UITemplate {
         }
         disableSaveButton();
         
-        System.out.println(dataLoadedFromFile.size() + " instances with "
+        String detailsStr = dataLoadedFromFile.size() + " instances with "
                 + uniqueDataLabels.size() + " labels loaded from "
-                + dataFilePath.getFileName() + " . The labels are:");
+                + dataFilePath.getFileName() + " . The labels are:";
         
         Iterator<String> labelItr = uniqueDataLabels.iterator();
-        
         while (labelItr.hasNext()) {
-            System.out.println("-"+labelItr.next());
+            detailsStr += "\n-" + labelItr.next();
         }
-//        System.out.println("-");
-
+        
+        inputDataDetails.setText(detailsStr);
     }
 }
