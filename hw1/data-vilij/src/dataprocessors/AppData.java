@@ -51,27 +51,22 @@ public class AppData implements DataComponent {
                     strToBeProcessed += singleLineInput + "\n";
                 }
 
-                if (processor.getErrorLineNumber(strToBeProcessed) != -1) {
+                ((AppUI) applicationTemplate.getUIComponent()).prepareUIForFileLoadedInput(dataByLine, processor.getErrorLineNumber(strToBeProcessed), dataFilePath);
+                // TODO: replace hard-coded strings
+                if (dataByLine.size() > 10) {
                     applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                            .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
-                                    manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
+                            .show("Data Loaded Successfully",
+                                    "Loaded data consists of "
+                                    + dataByLine.size()
+                                    + " line(s). Showing the first 10 in the text area.");
                 } else {
-                    ((AppUI) applicationTemplate.getUIComponent()).setTextAreaData(dataByLine);
-                    // TODO: replace hard-coded strings
-                    if (dataByLine.size() > 10) {
-                        applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                                .show("Data Loaded Successfully",
-                                        "Loaded data consists of "
-                                        + dataByLine.size()
-                                        + " line(s). Showing the first 10 in the text area.");
-                    } else {
-                        applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                                .show("Data Loaded Successfully",
-                                        "Loaded data consists of "
-                                        + dataByLine.size()
-                                        + " line(s).");
-                    }
+                    applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                            .show("Data Loaded Successfully",
+                                    "Loaded data consists of "
+                                    + dataByLine.size()
+                                    + " line(s).");
                 }
+
             }
         } catch (Exception ex) {
             // TODO: create appropriate Dialog Box
@@ -87,11 +82,7 @@ public class AppData implements DataComponent {
         // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
         try {
-            if (processor.getErrorLineNumber(dataString) != -1) {
-                applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                        .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
-                                manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
-            } else {
+            if (processor.getErrorLineNumber(dataString) != null) {
                 // plot data
                 displayData();
             }
@@ -110,11 +101,7 @@ public class AppData implements DataComponent {
         PropertyManager manager = applicationTemplate.manager;
         String strToBeProcessed = ((AppUI) applicationTemplate.getUIComponent()).getTextAreaData();
         try {
-            if (processor.getErrorLineNumber(strToBeProcessed) != -1) {
-                applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                        .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()),
-                                manager.getPropertyValue(INVALID_DATA_FORMAT.name()).replace("\\n", "\n"));
-            } else {
+            if (processor.getErrorLineNumber(strToBeProcessed) != null) {
                 // create and write to new file if file is NOT null
                 try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
                     // write contents of textArea to file

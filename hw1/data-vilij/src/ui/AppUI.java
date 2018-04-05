@@ -4,7 +4,10 @@ package ui;
 import actions.AppActions;
 import dataprocessors.AppData;
 import static java.io.File.separator;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ListIterator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -207,12 +210,10 @@ public final class AppUI extends UITemplate {
 
                 String strToBeProcessed = textArea.getText();
                 if (restOfTheLines != null) {
-
                     ListIterator<String> itr = restOfTheLines.listIterator();
                     while (itr.hasNext()) {
                         strToBeProcessed += "\n" + itr.next();
                     }
-
                 }
                 // load data into the data processor...
                 ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
@@ -266,12 +267,33 @@ public final class AppUI extends UITemplate {
     }
 
     /**
-     * Setter method used to populate the TextArea.
-     *
-     * @param dataLoadedFromFile data from loaded file
+     * Setter method used to disable saveButton.
      *
      */
-    public void setTextAreaData(ArrayList<String> dataLoadedFromFile) {
+    public void disableSaveButton() {
+        saveButton.setDisable(true);
+    }
+    
+    /**
+     * Prepares the UI for new user-typed input.
+     */
+    public void prepareUIForUserTypedInput(){
+        leftColumn.setVisible(true);
+        newButton.setDisable(true);
+    }
+    
+    /**
+     * Prepares and populates the UI for new input loaded from a file.
+     * 
+     * @param dataLoadedFromFile    data from loaded file
+     * @param uniqueDataLabels      different labels that exist in the input dataset
+     * @param dataFilePath          file path for input file
+     */
+    public void prepareUIForFileLoadedInput(ArrayList<String> dataLoadedFromFile, HashSet<String> uniqueDataLabels, Path dataFilePath){
+        editTogglePane.setVisible(false);
+        leftColumn.setVisible(true);
+        textArea.setDisable(true);
+        
         firstTenLines = new ArrayList<>();
         restOfTheLines = new ArrayList<>();
 
@@ -304,30 +326,17 @@ public final class AppUI extends UITemplate {
             hasNewText = true;
         }
         disableSaveButton();
-    }
+        
+        System.out.println(dataLoadedFromFile.size() + " instances with "
+                + uniqueDataLabels.size() + " labels loaded from "
+                + dataFilePath.getFileName() + " . The labels are:");
+        
+        Iterator<String> labelItr = uniqueDataLabels.iterator();
+        
+        while (labelItr.hasNext()) {
+            System.out.println("-"+labelItr.next());
+        }
+//        System.out.println("-");
 
-    /**
-     * Setter method used to disable saveButton.
-     *
-     */
-    public void disableSaveButton() {
-        saveButton.setDisable(true);
-    }
-    
-    /**
-     * Prepares the UI for new user-typed input.
-     */
-    public void prepareUIForUserTypedInput(){
-        leftColumn.setVisible(true);
-        newButton.setDisable(true);
-    }
-    
-    /**
-     * Prepares the UI for new input loaded from a file.
-     */
-    public void prepareUIForFileLoadedInput(){
-        editTogglePane.setVisible(false);
-        leftColumn.setVisible(true);
-        textArea.setDisable(true);
     }
 }

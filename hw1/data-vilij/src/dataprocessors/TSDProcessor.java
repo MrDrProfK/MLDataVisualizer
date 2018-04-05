@@ -152,11 +152,11 @@ public final class TSDProcessor {
      * Checks data for improper formatting/errors.
      * 
      * @param str   data to be analyzed
-     * @return      the line number corresponding to data improperly formatted
-     *              or -1 if no formatting errors are found.
-     * @throws java.lang.Exception
+     * @return      -1 if no formatting errors are found.
+     * @throws      java.lang.Exception if data is improper w/ the line number
+     *              corresponding to the improper data/format
      */
-    public int getErrorLineNumber(String str) throws Exception {
+    public HashSet<String> getErrorLineNumber(String str) throws Exception {
         ArrayList<String> dataToBeCheckedForErrors = new ArrayList<>(Arrays.asList(str.split("\n")));
         ListIterator<String> itr = dataToBeCheckedForErrors.listIterator();
 
@@ -173,7 +173,14 @@ public final class TSDProcessor {
                 throw new Exception("Error on line #" + lineCounter + ".\nData must conform to the Tab-Separated Format. For example:\n@InstanceName[TAB Press]Label[TAB Press]X-Coord,Y-Coord");
             }
         }
-
-        return -1;
+        
+        HashSet<String> uniqueDataLabels = new HashSet<>();
+        Iterator<String> labelItr = dataLabels.values().iterator();
+        
+        while (labelItr.hasNext()) {
+            uniqueDataLabels.add(labelItr.next());
+        }
+        
+        return uniqueDataLabels;
     }
 }

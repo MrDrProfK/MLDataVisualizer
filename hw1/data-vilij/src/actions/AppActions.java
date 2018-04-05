@@ -107,8 +107,6 @@ public final class AppActions implements ActionComponent {
             // present open file dialog
             dataFilePath = fileChooser.showOpenDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
             ((AppData) (applicationTemplate.getDataComponent())).loadData(dataFilePath);
-            
-            ((AppUI) (applicationTemplate.getUIComponent())).prepareUIForFileLoadedInput();
         } catch (NullPointerException npe) {
             // do nothing. save was aborted by user.
         }
@@ -154,7 +152,6 @@ public final class AppActions implements ActionComponent {
 
         // analyze the dialog button clicked
         if (confirmationDialog.getSelectedOption() == Option.YES) {
-
             FileChooser fileChooser = new FileChooser();
 
             // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
