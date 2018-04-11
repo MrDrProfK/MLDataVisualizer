@@ -35,6 +35,7 @@ public class BarGraphView extends VBox implements DataListener {
         this.barHeight = barHeight;
         bars = new ArrayList<>();
         initialize();
+        data.subscribe(this);
     }
 
     private void initialize() {

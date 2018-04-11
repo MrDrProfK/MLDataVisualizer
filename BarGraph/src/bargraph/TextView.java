@@ -23,6 +23,7 @@ public class TextView extends VBox implements DataListener {
     public TextView(DataModel data) {
         this.data = data;
         initialize();
+        data.subscribe(this);
     }
 
     private void initialize() {

@@ -2,6 +2,8 @@ package bargraph;
 
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Observer;
 
 /**
  * Data model underlying bar graph display. Objects represent indexed
@@ -54,6 +56,24 @@ public class DataModel {
      */
     public void setValue(int i, double v) {
         data.set(i, v);
+        publish(i, v);
+        
     }
     
+    List<DataListener> observers = new ArrayList<>();
+
+    private void publish(int i, double v) {
+        for (DataListener obs : observers) {
+            obs.dataChanged(i, v);
+        }
+    }
+
+    public void subscribe(DataListener obs) {
+        observers.add(obs);
+    }
+
+    public void unsubscribe(DataListener obs) {
+        observers.remove(obs);
+    }
+
 }
