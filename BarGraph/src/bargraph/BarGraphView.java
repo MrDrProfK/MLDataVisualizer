@@ -70,6 +70,9 @@ public class BarGraphView extends VBox implements DataListener {
     @Override
     public void dataChanged(int index, double value) {
         // TODO Fill this in.
+        BarGraphBar bar = new BarGraphBar(value, this, barWidth, barHeight);
+        getChildren().set(index, bar);
+        bars.set(index, bar);
     }
 
 }

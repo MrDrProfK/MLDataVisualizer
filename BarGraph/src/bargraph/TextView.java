@@ -43,6 +43,9 @@ public class TextView extends VBox implements DataListener {
     @Override
     public void dataChanged(int index, double value) {
         // TODO Auto-generated method stub
+        NumericField text = new NumericField(value, COLS);
+        getChildren().set(index, text);
+        data.setValue(index, value);
     }
 
 }
