@@ -33,7 +33,7 @@ public class AlgConfigDialog extends Stage {
     }
 
     private static AlgConfigDialog dialog;
-    private AlgorithmConfiguration newAlgConfig = new AlgorithmConfiguration(0,0,true,true,0);
+    private AlgorithmConfiguration newAlgConfig;
 
     private Option selectedOption;
     private TextField numOfClusteringLabels;
@@ -115,11 +115,9 @@ public class AlgConfigDialog extends Stage {
         this.clustering.setVisible(oldAlgConfig.clustering);
         this.clustering.setText(Integer.toString(oldAlgConfig.numOfClusteringLabels));
         
-        newAlgConfig.numOfClusteringLabels = oldAlgConfig.numOfClusteringLabels;
-        newAlgConfig.updateInterval = oldAlgConfig.updateInterval;
-        newAlgConfig.continuousRun = oldAlgConfig.continuousRun;
-        newAlgConfig.clustering = oldAlgConfig.clustering;
-        newAlgConfig.numOfClusteringLabels = oldAlgConfig.numOfClusteringLabels;
+        newAlgConfig = new AlgorithmConfiguration(oldAlgConfig.numOfClusteringLabels, 
+                oldAlgConfig.updateInterval, oldAlgConfig.continuousRun, 
+                oldAlgConfig.clustering, oldAlgConfig.numOfClusteringLabels);
         
         this.numOfClusteringLabels.setOnAction(e->{
             validatenumOfClusteringLabels();
@@ -140,10 +138,6 @@ public class AlgConfigDialog extends Stage {
         }else{
             return oldAlgConfig;
         }
-    }
-
-    public Option getSelectedOption() {
-        return selectedOption;
     }
     
     private void validatenumOfClusteringLabels(){
@@ -181,5 +175,4 @@ public class AlgConfigDialog extends Stage {
             this.numOfClusteringLabels.setText(Integer.toString(newAlgConfig.numOfClusteringLabels));
         }
     }
-//    public Option getSelectedOption() { return selectedOption; }
 }
