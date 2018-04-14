@@ -1,6 +1,8 @@
 // Aaron Knoll
 package actions;
 
+import components.AlgConfigDialog;
+import components.AlgorithmConfiguration;
 import dataprocessors.AppData;
 import java.io.FileWriter;
 import vilij.components.ActionComponent;
@@ -12,8 +14,8 @@ import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import static settings.AppPropertyTypes.*;
 import ui.AppUI;
+import ui.DataVisualizer;
 import vilij.components.ConfirmationDialog;
-import vilij.components.ConfirmationDialog.Option;
 import vilij.components.Dialog;
 import vilij.propertymanager.PropertyManager;
 
@@ -144,14 +146,13 @@ public final class AppActions implements ActionComponent {
      * <code>true</code> otherwise.
      */
     private boolean promptToSave() throws IOException {
-        // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
 
         ConfirmationDialog confirmationDialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
         confirmationDialog.show(manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()), manager.getPropertyValue(SAVE_UNSAVED_WORK.name()));
 
         // analyze the dialog button clicked
-        if (confirmationDialog.getSelectedOption() == Option.YES) {
+        if (confirmationDialog.getSelectedOption() == ConfirmationDialog.Option.YES) {
             FileChooser fileChooser = new FileChooser();
 
             // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
@@ -176,11 +177,24 @@ public final class AppActions implements ActionComponent {
                 // saving was aborted by user
                 throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), npe);
             }
-        } else if (confirmationDialog.getSelectedOption() == Option.CANCEL) {
+        } else if (confirmationDialog.getSelectedOption() == ConfirmationDialog.Option.CANCEL) {
             // return false for CANCEL button click
             return false;
         }
         // return true for both YES and NO button clicks
+        return true;
+    }
+    
+    public boolean configAlgorithm(){
+        PropertyManager manager = applicationTemplate.manager;
+        
+//        AlgConfigDialog algConfigDialog = AlgConfigDialog.getDialog();
+//        algConfigDialog.init(applicationTemplate.getUIComponent().getPrimaryWindow());
+
+        AlgorithmConfiguration algConfig = new AlgorithmConfiguration(10000, 5, true, true, 4);
+        AlgConfigDialog algConfigDialog = DataVisualizer.getAlgConfigDialog();
+        algConfig = algConfigDialog.show(algConfig);
+
         return true;
     }
 }

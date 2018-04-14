@@ -21,6 +21,8 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -53,10 +55,15 @@ public final class AppUI extends UITemplate {
     private boolean hasNewText;                 // whether or not the text area has any new data since last display
 
     private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
+    private String runConfigIconPath;           // relative (partial) path to RUNCONFIG_ICON
     private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
 
     private ToggleButton editToggle;            // toggle for edit/done functionality
+    private ChoiceBox selectAlgType;            // drop-down for algorithm type selection
+    HBox algOptionsPane;                        // pane to show different algorithms for a specified type
+    private RadioButton alg1;                   // radio button for dummy algorithm
+    private Button configAlgBtn;                // button to open algorithm configuration window
     private final VBox leftColumn = new VBox(); // create first column
     
     private Label inputDataDetails;
@@ -80,6 +87,7 @@ public final class AppUI extends UITemplate {
                 manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
                 manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
         scrnshoticonPath = String.join(separator, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
+        runConfigIconPath = String.join(separator, iconsPath, "run-config.png");
     }
 
     @Override
@@ -147,28 +155,42 @@ public final class AppUI extends UITemplate {
         inputDataDetails = new Label();
         inputDataDetails.setWrapText(true);
 
-        ChoiceBox selectAlgType = new ChoiceBox(FXCollections.observableArrayList("Algorithm Type", "Classification", "Clustering"));
+        selectAlgType = new ChoiceBox(FXCollections.observableArrayList("Algorithm Type", "Classification", "Clustering"));
         selectAlgType.getSelectionModel().selectFirst();
         
-        Label algTypeLabel = new Label();
-        algTypeLabel.setVisible(false);
         ToggleGroup group = new ToggleGroup();
 
-        RadioButton alg1 = new RadioButton("Random Classification 1");
+        alg1 = new RadioButton("Random Classification");
         alg1.setToggleGroup(group);
         alg1.setSelected(true);
+        
+        Image imageOk = new Image(runConfigIconPath);
+        configAlgBtn = new Button("", new ImageView(imageOk));
 
-        RadioButton alg2 = new RadioButton("Random Classification 2");
-        alg2.setToggleGroup(group);
-
-//        ChoiceBox selectAlg = new ChoiceBox(FXCollections.observableArrayList("Algorithm", "Random Classification", "Random Clustering"));
-//        selectAlg.getSelectionModel().selectFirst();
-//        selectAlg.setVisible(false);
+//        RadioButton alg2 = new RadioButton("Random Classification 2");
+//        alg2.setToggleGroup(group);
         
         leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
-        leftColumn.getChildren().addAll(dataFileLabel, editTogglePane, textArea, inputDataDetails, selectAlgType, algTypeLabel, runButton);
-        // align and space UI objects within the column
+//        leftColumn.getChildren().addAll(dataFileLabel, editTogglePane, textArea, inputDataDetails, selectAlgType, alg1,runButton);
+        leftColumn.getChildren().add(dataFileLabel);
+        leftColumn.getChildren().add(editTogglePane);
+        leftColumn.getChildren().add(textArea);
+        leftColumn.getChildren().add(inputDataDetails);
+        leftColumn.getChildren().add(selectAlgType);
+        // TODO:    iterate over ArrayList of algorithms for the given algorithm type
+        //          and add the elements to the column
+        algOptionsPane = new HBox();
+//        algOptionsPane.setPadding(new Insets(0, 0, -9, 0));
+        algOptionsPane.setAlignment(Pos.CENTER_LEFT);
+        alg1.setPadding(new Insets(0, 0, 0, 5));
+        algOptionsPane.getChildren().add(configAlgBtn);
+        algOptionsPane.getChildren().add(alg1);
+        algOptionsPane.setVisible(false);
+        leftColumn.getChildren().add(algOptionsPane);
+        leftColumn.getChildren().add(runButton);
+
+// align and space UI objects within the column
         leftColumn.setAlignment(Pos.TOP_CENTER);
         leftColumn.setSpacing(10);
         leftColumn.setPadding(new Insets(10, 0, 10, 20));
@@ -207,6 +229,24 @@ public final class AppUI extends UITemplate {
 
     private void setWorkspaceActions() {
         hasNewText = false;
+
+        configAlgBtn.setOnAction(e -> ((AppActions) applicationTemplate.getActionComponent()).configAlgorithm());
+        
+        selectAlgType.setOnAction(e -> {
+            switch (selectAlgType.getSelectionModel().getSelectedIndex()) {
+                case 1:
+                    alg1.setText("Random Classification");
+                    algOptionsPane.setVisible(true);
+                    break;
+                case 2:
+                    alg1.setText("Random Clustering");
+                    algOptionsPane.setVisible(true);
+                    break;
+                default:
+                    algOptionsPane.setVisible(false);
+                    break;
+            }
+        });
 
         editToggle.setOnAction(e -> {
             if (editToggle.isSelected()) {

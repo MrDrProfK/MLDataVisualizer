@@ -1,8 +1,10 @@
 package ui;
 
 import actions.AppActions;
+import components.AlgConfigDialog;
 import dataprocessors.AppData;
 import javafx.stage.Stage;
+import vilij.components.Dialog;
 import vilij.templates.ApplicationTemplate;
 
 import static vilij.settings.InitializationParams.*;
@@ -16,11 +18,18 @@ import static vilij.settings.InitializationParams.*;
  */
 public final class DataVisualizer extends ApplicationTemplate {
 
+    protected static final AlgConfigDialog algConfigDialog = AlgConfigDialog.getDialog();
+    
     @Override
     public void start(Stage primaryStage) {
         dialogsAudit(primaryStage);
+        algConfigDialog.init(primaryStage);
         if (propertyAudit())
             userInterfaceAudit(primaryStage);
+    }
+
+    public static AlgConfigDialog getAlgConfigDialog() {
+        return algConfigDialog;
     }
 
     @Override
