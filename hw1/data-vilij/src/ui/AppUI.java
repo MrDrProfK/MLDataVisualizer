@@ -47,27 +47,27 @@ public final class AppUI extends UITemplate {
     ApplicationTemplate applicationTemplate;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private Button scrnshotButton;              // toolbar button to take a screenshot of the data
-    private LineChart<Number, Number> chart;    // the chart where data will be displayed (LineChart version of original chart)
+    private Button scrnshotButton;                  // toolbar button to take a screenshot of the data
+    private LineChart<Number, Number> chart;        // the chart where data will be displayed (LineChart version of original chart)
 
-    private Button runButton;                   // workspace button to display data on the chart
-    private TextArea textArea;                  // text area for new data input
-    private boolean hasNewText;                 // whether or not the text area has any new data since last display
+    private Button runButton;                       // workspace button to display data on the chart
+    private TextArea textArea;                      // text area for new data input
+    private boolean hasNewText;                     // whether or not the text area has any new data since last display
 
-    private String scrnshoticonPath;            // relative (partial) path to SCREENSHOT_ICON
-    private String runConfigIconPath;           // relative (partial) path to RUNCONFIG_ICON
-    private ArrayList<String> firstTenLines;    // lines of data to be displayed in the TextArea
-    private ArrayList<String> restOfTheLines;   // lines of data that are to replenish the TextArea
+    private String scrnshoticonPath;                // relative (partial) path to SCREENSHOT_ICON
+    private String runConfigIconPath;               // relative (partial) path to RUNCONFIG_ICON
+    private ArrayList<String> firstTenLines;        // lines of data to be displayed in the TextArea
+    private ArrayList<String> restOfTheLines;       // lines of data that are to replenish the TextArea
 
-    private ToggleButton editToggle;            // toggle for edit/done functionality
-    private ChoiceBox selectAlgType;            // drop-down for algorithm type selection
-    HBox algOptionsPane;                        // pane to show different algorithms for a specified type
-    private RadioButton alg1;                   // radio button for dummy algorithm
-    private Button configAlgBtn;                // button to open algorithm configuration window
-    private final VBox leftColumn = new VBox(); // create first column
+    private ToggleButton editToggle;                // toggle for edit/done functionality
+    private ChoiceBox selectAlgType;                // drop-down for algorithm type selection
+    private HBox algOptionsPane;                    // pane to show different algorithms for a specified type
+    private RadioButton alg1;                       // radio button for dummy algorithm
+    private Button configAlgBtn;                    // button to open algorithm configuration window
+    private final VBox leftColumn = new VBox();     // create first column
     
-    private Label inputDataDetails;
-    HBox editTogglePane = new HBox();
+    private Label inputDataDetails;                 // 
+    private final HBox editTogglePane = new HBox(); // 
     
     public LineChart<Number, Number> getChart() {
         return chart;
@@ -172,7 +172,6 @@ public final class AppUI extends UITemplate {
         
         leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
-//        leftColumn.getChildren().addAll(dataFileLabel, editTogglePane, textArea, inputDataDetails, selectAlgType, alg1,runButton);
         leftColumn.getChildren().add(dataFileLabel);
         leftColumn.getChildren().add(editTogglePane);
         leftColumn.getChildren().add(textArea);
@@ -181,7 +180,6 @@ public final class AppUI extends UITemplate {
         // TODO:    iterate over ArrayList of algorithms for the given algorithm type
         //          and add the elements to the column
         algOptionsPane = new HBox();
-//        algOptionsPane.setPadding(new Insets(0, 0, -9, 0));
         algOptionsPane.setAlignment(Pos.CENTER_LEFT);
         alg1.setPadding(new Insets(0, 0, 0, 5));
         algOptionsPane.getChildren().add(configAlgBtn);
@@ -190,7 +188,7 @@ public final class AppUI extends UITemplate {
         leftColumn.getChildren().add(algOptionsPane);
         leftColumn.getChildren().add(runButton);
 
-// align and space UI objects within the column
+        // align and space UI objects within the column
         leftColumn.setAlignment(Pos.TOP_CENTER);
         leftColumn.setSpacing(10);
         leftColumn.setPadding(new Insets(10, 0, 10, 20));
@@ -222,9 +220,6 @@ public final class AppUI extends UITemplate {
         
         // add custom style to application
         getPrimaryScene().getStylesheets().add("gui/css/data-vilij.css");
-//        super.getPrimaryScene().setCursor(Cursor.WAIT);
-//        getPrimaryScene().getRoot().setCursor(Cursor.WAIT);
-//        System.out.println(super.getPrimaryScene().getStylesheets());
     }
 
     private void setWorkspaceActions() {
@@ -233,12 +228,12 @@ public final class AppUI extends UITemplate {
         configAlgBtn.setOnAction(e -> ((AppActions) applicationTemplate.getActionComponent()).configAlgorithm());
         
         selectAlgType.setOnAction(e -> {
-            switch (selectAlgType.getSelectionModel().getSelectedIndex()) {
-                case 1:
+            switch (selectAlgType.getSelectionModel().getSelectedItem().toString()) {
+                case "Classification":
                     alg1.setText("Random Classification");
                     algOptionsPane.setVisible(true);
                     break;
-                case 2:
+                case "Clustering":
                     alg1.setText("Random Clustering");
                     algOptionsPane.setVisible(true);
                     break;
@@ -298,8 +293,6 @@ public final class AppUI extends UITemplate {
                 // new data that can potentially be displayed, by virtue of there being a newly typed character
                 hasNewText = true;
             }
-            // print # lines of data in TextArea (for debugging purposes)
-//            System.out.println(textArea.getText().split("\n", -1).length);
 
             // TODO: REVISIT LATER!!!
             if (restOfTheLines != null) {
@@ -388,6 +381,11 @@ public final class AppUI extends UITemplate {
         String detailsStr = dataLoadedFromFile.size() + " instances with "
                 + uniqueDataLabels.size() + " labels loaded from "
                 + dataFilePath.getFileName() + " . The labels are:";
+        
+        if (uniqueDataLabels.size() != 2) {
+            // TODO: disable classification algorithm type
+            selectAlgType.getItems().remove(1);
+        }
         
         Iterator<String> labelItr = uniqueDataLabels.iterator();
         while (labelItr.hasNext()) {

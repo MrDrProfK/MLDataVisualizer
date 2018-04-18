@@ -124,7 +124,7 @@ public final class TSDProcessor {
                         pts.getNode().setOnMouseEntered(e->{
 //                            toolTip.getScene().setCursor(Cursor.WAIT);
 //                            chart.getScene().setCursor(Cursor.WAIT);
-                            System.out.println("in node");
+//                            System.out.println("in node");
                             });
                         
                         Tooltip.install(pts.getNode(), toolTip);
@@ -166,19 +166,22 @@ public final class TSDProcessor {
                 processString(itr.next());
                 lineCounter++;
             }
-        } catch(Exception ex){
-            if(ex.getMessage().contains("DuplicateInstanceNameException")){
+        } catch (Exception ex) {
+            if (ex.getMessage().contains("DuplicateInstanceNameException")) {
                 throw new Exception(ex.getMessage().split(": ", 2)[1]);
-            }else{
+            } else {
                 throw new Exception("Error on line #" + lineCounter + ".\nData must conform to the Tab-Separated Format. For example:\n@InstanceName[TAB Press]Label[TAB Press]X-Coord,Y-Coord");
             }
         }
         
         HashSet<String> uniqueDataLabels = new HashSet<>();
         Iterator<String> labelItr = dataLabels.values().iterator();
-        
+      
         while (labelItr.hasNext()) {
-            uniqueDataLabels.add(labelItr.next());
+            String currentLabel = labelItr.next();
+            if (currentLabel.compareTo("null") != 0) {
+                uniqueDataLabels.add(currentLabel);
+            }
         }
         
         return uniqueDataLabels;
