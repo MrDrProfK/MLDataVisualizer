@@ -10,6 +10,7 @@ import vilij.templates.ApplicationTemplate;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import static settings.AppPropertyTypes.*;
@@ -31,12 +32,14 @@ public final class AppActions implements ActionComponent {
      * The application to which this class of actions belongs.
      */
     private ApplicationTemplate applicationTemplate;
-    
+
     /**
      * Path to the data file currently active.
      */
     Path dataFilePath;
     
+    HashMap<String, AlgorithmConfiguration> algConfigs;
+
     /**
      * Indicates whether or not a new request is occurring for the first time
      * since application startup
@@ -46,12 +49,13 @@ public final class AppActions implements ActionComponent {
     public AppActions(ApplicationTemplate applicationTemplate) {
         this.applicationTemplate = applicationTemplate;
         firstNewRequest = true;
+        algConfigs = new HashMap<>();
     }
 
     @Override
     public void handleNewRequest() {
         // if it's NOT the first request to create new data since application startup...
-        if(!firstNewRequest) {
+        if (!firstNewRequest) {
             // try to prompt user to save current work before clearing and resetting data
             try {
                 if (!firstNewRequest && promptToSave()) {
@@ -89,7 +93,7 @@ public final class AppActions implements ActionComponent {
             }
 
             ((AppData) (applicationTemplate.getDataComponent())).saveData(dataFilePath);
-            
+
         } catch (NullPointerException npe) {
             // do nothing. save was aborted by user.
         }
@@ -184,13 +188,16 @@ public final class AppActions implements ActionComponent {
         // return true for both YES and NO button clicks
         return true;
     }
-    
-    public boolean configAlgorithm(){
-        PropertyManager manager = applicationTemplate.manager;
+
+    public boolean configAlgorithm(String algName) {
+//        PropertyManager manager = applicationTemplate.manager;
+
+        if (algConfigs.get(algName) == null) {
+            algConfigs.put(algName, new AlgorithmConfiguration(10000, 5, true, true, 4));
+        }
         
-        AlgorithmConfiguration algConfig = new AlgorithmConfiguration(10000, 5, true, true, 4);
         AlgConfigDialog algConfigDialog = DataVisualizer.getAlgConfigDialog();
-        algConfig = algConfigDialog.show(algConfig);
+        algConfigDialog.show(algConfigs.get(algName));
 
         return true;
     }

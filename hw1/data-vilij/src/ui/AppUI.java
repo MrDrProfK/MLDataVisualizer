@@ -58,10 +58,11 @@ public final class AppUI extends UITemplate {
     private ArrayList<String> firstTenLines;        // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;       // lines of data that are to replenish the TextArea
 
-    private Button editToggle;                // toggle for edit/done functionality
+    private Button editToggle;                      // toggle for edit/done functionality
     private ChoiceBox selectAlgType;                // drop-down for algorithm type selection
     private HBox algOptionsPane;                    // pane to show different algorithms for a specified type
-    private RadioButton alg1;                       // radio button for dummy algorithm
+    
+    private ArrayList<RadioButton> algorithmBtns;   // radio buttons for algorithm selection
     private Button configAlgBtn;                    // button to open algorithm configuration window
     private final VBox leftColumn = new VBox();     // create first column
     
@@ -165,10 +166,14 @@ public final class AppUI extends UITemplate {
         selectAlgType.getSelectionModel().selectFirst();
         
         ToggleGroup group = new ToggleGroup();
-
-        alg1 = new RadioButton("Random Classification");
-        alg1.setToggleGroup(group);
-        alg1.setSelected(true);
+        
+        algorithmBtns = new ArrayList<>();
+        algorithmBtns.add(new RadioButton("Random Classification"));
+        algorithmBtns.forEach(rb -> rb.setToggleGroup(group));
+        
+//        algorithmBtns.get(0) = new RadioButton("Random Classification");
+//        algorithmBtns.get(0).setToggleGroup(group);
+        algorithmBtns.get(0).setSelected(true);
         
         Image imageOk = new Image(runConfigIconPath);
         configAlgBtn = new Button("", new ImageView(imageOk));
@@ -187,9 +192,9 @@ public final class AppUI extends UITemplate {
         //          and add the elements to the column
         algOptionsPane = new HBox();
         algOptionsPane.setAlignment(Pos.CENTER_LEFT);
-        alg1.setPadding(new Insets(0, 0, 0, 5));
+        algorithmBtns.get(0).setPadding(new Insets(0, 0, 0, 5));
         algOptionsPane.getChildren().add(configAlgBtn);
-        algOptionsPane.getChildren().add(alg1);
+        algOptionsPane.getChildren().add(algorithmBtns.get(0));
         algOptionsPane.setVisible(false);
         leftColumn.getChildren().add(algOptionsPane);
         leftColumn.getChildren().add(runButton);
@@ -231,16 +236,16 @@ public final class AppUI extends UITemplate {
     private void setWorkspaceActions() {
         hasNewText = false;
 
-        configAlgBtn.setOnAction(e -> ((AppActions) applicationTemplate.getActionComponent()).configAlgorithm());
+        configAlgBtn.setOnAction(e -> ((AppActions) applicationTemplate.getActionComponent()).configAlgorithm("RandomClassifier"));
         
         selectAlgType.setOnAction(e -> {
             switch (selectAlgType.getSelectionModel().getSelectedItem().toString()) {
                 case "Classification":
-                    alg1.setText("Random Classification");
+                    algorithmBtns.get(0).setText("Random Classification");
                     algOptionsPane.setVisible(true);
                     break;
                 case "Clustering":
-                    alg1.setText("Random Clustering");
+                    algorithmBtns.get(0).setText("Random Clustering");
                     algOptionsPane.setVisible(true);
                     break;
                 default:

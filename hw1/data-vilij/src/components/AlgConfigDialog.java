@@ -22,6 +22,7 @@ import javafx.scene.layout.GridPane;
  * @author aaronknoll
  */
 public class AlgConfigDialog extends Stage {
+
     public enum Option {
 
         OK("OK"), CANCEL("Cancel");
@@ -29,7 +30,9 @@ public class AlgConfigDialog extends Stage {
         @SuppressWarnings("unused")
         private String option;
 
-        Option(String option) { this.option = option; }
+        Option(String option) {
+            this.option = option;
+        }
     }
 
     private static AlgConfigDialog dialog;
@@ -42,25 +45,28 @@ public class AlgConfigDialog extends Stage {
     private TextField clustering;
     private CheckBox continuousRun;
 
-    private AlgConfigDialog() { /* empty constructor */ }
+    private AlgConfigDialog() {
+        /* empty constructor */ }
 
     public static AlgConfigDialog getDialog() {
-        if (dialog == null)
+        if (dialog == null) {
             dialog = new AlgConfigDialog();
+        }
         return dialog;
     }
 
     /**
      * Completely initializes the error dialog to be used.
      *
-     * @param owner the window on top of which the error dialog window will be displayed
+     * @param owner the window on top of which the error dialog window will be
+     * displayed
      */
     public void init(Stage owner) {
         initModality(Modality.WINDOW_MODAL); // modal => messages are blocked from reaching other windows
         initOwner(owner);
 
         List<Button> buttons = Arrays.asList(new Button(Option.OK.name()),
-                                             new Button(Option.CANCEL.name()));
+                new Button(Option.CANCEL.name()));
 
         buttons.forEach(button -> button.setOnAction(e -> {
             this.selectedOption = Option.valueOf(((Button) e.getSource()).getText());
@@ -76,7 +82,7 @@ public class AlgConfigDialog extends Stage {
         updateInterval = new TextField();
         clustering = new TextField();
         continuousRun = new CheckBox("Continuous Run");
-        
+
         continuousRun.setIndeterminate(false);
 
         grid.add(new Label("Max. Iterations:"), 0, 0);
@@ -86,7 +92,7 @@ public class AlgConfigDialog extends Stage {
         grid.add(clusterLabel, 0, 2);
         grid.add(clustering, 1, 2);
         grid.add(continuousRun, 1, 3);
-        
+
         HBox buttonBox = new HBox(5);
         buttonBox.getChildren().addAll(buttons);
 
@@ -99,51 +105,54 @@ public class AlgConfigDialog extends Stage {
     }
 
     /**
-     * 
-     * @param oldAlgConfig
-     * @return 
+     *
+     * @param algConfig
+//     * @return
      */
-    public AlgorithmConfiguration show(AlgorithmConfiguration oldAlgConfig) {
+//    public AlgorithmConfiguration show(AlgorithmConfiguration algConfig) {
+    public void show(AlgorithmConfiguration algConfig) {
+
         // set the title of the dialog
         setTitle("Algorithm Run Configuration");
 
-        this.numOfClusteringLabels.setText(Integer.toString(oldAlgConfig.numOfClusteringLabels));
-        this.updateInterval.setText(Integer.toString(oldAlgConfig.updateInterval));
-        this.continuousRun.setSelected(oldAlgConfig.continuousRun == true);
-        
-        clusterLabel.setVisible(oldAlgConfig.clustering);
-        this.clustering.setVisible(oldAlgConfig.clustering);
-        this.clustering.setText(Integer.toString(oldAlgConfig.numOfClusteringLabels));
-        
-        newAlgConfig = new AlgorithmConfiguration(oldAlgConfig.numOfClusteringLabels, 
-                oldAlgConfig.updateInterval, oldAlgConfig.continuousRun, 
-                oldAlgConfig.clustering, oldAlgConfig.numOfClusteringLabels);
-        
-        this.numOfClusteringLabels.setOnAction(e->{
+        this.numOfClusteringLabels.setText(Integer.toString(algConfig.numOfClusteringLabels));
+        this.updateInterval.setText(Integer.toString(algConfig.updateInterval));
+        this.continuousRun.setSelected(algConfig.continuousRun == true);
+
+        clusterLabel.setVisible(algConfig.clustering);
+        this.clustering.setVisible(algConfig.clustering);
+        this.clustering.setText(Integer.toString(algConfig.numOfClusteringLabels));
+
+        newAlgConfig = new AlgorithmConfiguration(algConfig.numOfClusteringLabels,
+                algConfig.updateInterval, algConfig.continuousRun,
+                algConfig.clustering, algConfig.numOfClusteringLabels);
+
+        this.numOfClusteringLabels.setOnAction(e -> {
             validatenumOfClusteringLabels();
         });
-        
-        this.updateInterval.setOnAction(e->{
+
+        this.updateInterval.setOnAction(e -> {
             validateUpdateInterval();
         });
-        
-        this.clustering.setOnAction(e->{
+
+        this.clustering.setOnAction(e -> {
             validateNumOfClusteringLabels();
         });
         // open the dialog and wait for the user to click the close button
         showAndWait();
-        
-        if(selectedOption == Option.OK){
-            return newAlgConfig;
-        }else{
-            return oldAlgConfig;
+
+        if (selectedOption == Option.OK) {
+//            return newAlgConfig;
+            algConfig = newAlgConfig;
+        } else {
+//            return algConfig;
         }
     }
-    
-    private void validatenumOfClusteringLabels(){
+
+    private void validatenumOfClusteringLabels() {
         try {
             newAlgConfig.numOfClusteringLabels = Integer.valueOf(this.numOfClusteringLabels.getText());
-            if(newAlgConfig.numOfClusteringLabels < 1) {
+            if (newAlgConfig.numOfClusteringLabels < 1) {
                 newAlgConfig.numOfClusteringLabels = 1;
                 this.numOfClusteringLabels.setText(Integer.toString(newAlgConfig.numOfClusteringLabels));
             }
@@ -151,11 +160,11 @@ public class AlgConfigDialog extends Stage {
             this.numOfClusteringLabels.setText(Integer.toString(newAlgConfig.numOfClusteringLabels));
         }
     }
-    
-    private void validateUpdateInterval(){
+
+    private void validateUpdateInterval() {
         try {
             newAlgConfig.updateInterval = Integer.valueOf(this.updateInterval.getText());
-            if(newAlgConfig.updateInterval < 1) {
+            if (newAlgConfig.updateInterval < 1) {
                 newAlgConfig.updateInterval = 1;
                 this.updateInterval.setText(Integer.toString(newAlgConfig.updateInterval));
             }
@@ -163,11 +172,11 @@ public class AlgConfigDialog extends Stage {
             this.updateInterval.setText(Integer.toString(newAlgConfig.updateInterval));
         }
     }
-    
-    private void validateNumOfClusteringLabels(){
+
+    private void validateNumOfClusteringLabels() {
         try {
             newAlgConfig.numOfClusteringLabels = Integer.valueOf(this.numOfClusteringLabels.getText());
-            if(newAlgConfig.numOfClusteringLabels < 1) {
+            if (newAlgConfig.numOfClusteringLabels < 1) {
                 newAlgConfig.numOfClusteringLabels = 1;
                 this.numOfClusteringLabels.setText(Integer.toString(newAlgConfig.numOfClusteringLabels));
             }

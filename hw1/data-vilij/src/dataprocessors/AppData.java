@@ -119,8 +119,8 @@ public class AppData implements DataComponent {
             }
         } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
-                        .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()),
-                                ex.getMessage());
+                    .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()),
+                            ex.getMessage());
         }
         // clear data from data processor
         clear();
