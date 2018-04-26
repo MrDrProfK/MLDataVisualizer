@@ -50,12 +50,8 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleNewRequest() {
-        // if it's the first request to create new data since application startup...
-        if(firstNewRequest) {
-            // show left column
-            ((AppUI) (applicationTemplate.getUIComponent())).prepareUIForUserTypedInput();
-            firstNewRequest = false;
-        } else {
+        // if it's NOT the first request to create new data since application startup...
+        if(!firstNewRequest) {
             // try to prompt user to save current work before clearing and resetting data
             try {
                 if (!firstNewRequest && promptToSave()) {
@@ -67,7 +63,11 @@ public final class AppActions implements ActionComponent {
                 applicationTemplate.getDialog(Dialog.DialogType.ERROR)
                         .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
             }
+        } else {
+            firstNewRequest = false;
         }
+        // show left column
+        ((AppUI) (applicationTemplate.getUIComponent())).prepareUIForUserTypedInput();
     }
 
     @Override

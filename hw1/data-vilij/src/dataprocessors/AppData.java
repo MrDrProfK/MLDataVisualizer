@@ -78,21 +78,25 @@ public class AppData implements DataComponent {
         clear();
     }
 
-    public void loadData(String dataString) {
+    public boolean loadData(String dataString) {
         // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
         try {
             if (processor.getErrorLineNumber(dataString) != null) {
                 // plot data
-                displayData();
+//                displayData();
             }
         } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
                     .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
                             ex.getMessage());
+            return false;
         }
+        
+        // if data was successfully loaded
+        return true;
         // clear data from data processor
-        clear();
+//        clear();
     }
 
     @Override

@@ -19,7 +19,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -59,7 +58,7 @@ public final class AppUI extends UITemplate {
     private ArrayList<String> firstTenLines;        // lines of data to be displayed in the TextArea
     private ArrayList<String> restOfTheLines;       // lines of data that are to replenish the TextArea
 
-    private ToggleButton editToggle;                // toggle for edit/done functionality
+    private Button editToggle;                // toggle for edit/done functionality
     private ChoiceBox selectAlgType;                // drop-down for algorithm type selection
     private HBox algOptionsPane;                    // pane to show different algorithms for a specified type
     private RadioButton alg1;                       // radio button for dummy algorithm
@@ -120,8 +119,12 @@ public final class AppUI extends UITemplate {
 
     @Override
     public void clear() {
-        // clear contents of textArea and scatter chart
+        // clear contents of TextArea and allow for initial editing
         textArea.clear();
+        textArea.setDisable(false);
+        // clear contents of Label that displays details of the inputted dataset
+        inputDataDetails.setText("");
+        // clear contents of scatter chart
         chart.getData().clear();
         // DO NOT allow the user to take a screenshot of an empty chart
         scrnshotButton.setDisable(true);
@@ -133,6 +136,10 @@ public final class AppUI extends UITemplate {
         // clear data contained in the ArrayLists
         firstTenLines = null;
         restOfTheLines = null;
+        
+        if (selectAlgType.getItems().size() < 3) {
+            selectAlgType.getItems().add(1, "Classification");
+        }
     }
 
     private void layout() {
@@ -145,8 +152,7 @@ public final class AppUI extends UITemplate {
         runButton = new Button("Run");
 //        runButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
        
-        editToggle = new ToggleButton("Done");
-        editToggle.setSelected(true);
+        editToggle = new Button("Done");
         
         editTogglePane.setPadding(new Insets(0, 0, -9, 0));
         editTogglePane.setAlignment(Pos.CENTER_RIGHT);
@@ -244,12 +250,22 @@ public final class AppUI extends UITemplate {
         });
 
         editToggle.setOnAction(e -> {
-            if (editToggle.isSelected()) {
+            if (editToggle.getText().compareTo("Done") == 0) {
+                String strToBeProcessed = textArea.getText();
+                if (restOfTheLines != null) {
+                    ListIterator<String> itr = restOfTheLines.listIterator();
+                    while (itr.hasNext()) {
+                        strToBeProcessed += "\n" + itr.next();
+                    }
+                }
+                // load data into the data processor...
+                if (((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed)) {
+                    textArea.setDisable(true);
+                    editToggle.setText("Edit");
+                }
+            } else {
                 textArea.setDisable(false);
                 editToggle.setText("Done");
-            } else {
-                textArea.setDisable(true);
-                editToggle.setText("Edit");
             }
         });
 
@@ -261,15 +277,15 @@ public final class AppUI extends UITemplate {
                 // DO NOT allow the user to take a screenshot of an empty chart
                 scrnshotButton.setDisable(true);
 
-                String strToBeProcessed = textArea.getText();
-                if (restOfTheLines != null) {
-                    ListIterator<String> itr = restOfTheLines.listIterator();
-                    while (itr.hasNext()) {
-                        strToBeProcessed += "\n" + itr.next();
-                    }
-                }
-                // load data into the data processor...
-                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
+//                String strToBeProcessed = textArea.getText();
+//                if (restOfTheLines != null) {
+//                    ListIterator<String> itr = restOfTheLines.listIterator();
+//                    while (itr.hasNext()) {
+//                        strToBeProcessed += "\n" + itr.next();
+//                    }
+//                }
+//                // load data into the data processor...
+//                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
                 // if data is plotted...
                 if (!chart.getData().isEmpty()) {
                     // allow the user to take a screenshot of the chart
@@ -329,6 +345,8 @@ public final class AppUI extends UITemplate {
      * Prepares the UI for new user-typed input.
      */
     public void prepareUIForUserTypedInput(){
+        clear();
+        editTogglePane.setVisible(true);
         leftColumn.setVisible(true);
         newButton.setDisable(true);
     }
@@ -341,6 +359,7 @@ public final class AppUI extends UITemplate {
      * @param dataFilePath          file path for input file
      */
     public void prepareUIForFileLoadedInput(ArrayList<String> dataLoadedFromFile, HashSet<String> uniqueDataLabels, Path dataFilePath){
+        clear();
         editTogglePane.setVisible(false);
         leftColumn.setVisible(true);
         textArea.setDisable(true);
@@ -381,7 +400,7 @@ public final class AppUI extends UITemplate {
         String detailsStr = dataLoadedFromFile.size() + " instances with "
                 + uniqueDataLabels.size() + " labels loaded from "
                 + dataFilePath.getFileName() + " . The labels are:";
-        
+
         if (uniqueDataLabels.size() != 2) {
             // TODO: disable classification algorithm type
             selectAlgType.getItems().remove(1);
