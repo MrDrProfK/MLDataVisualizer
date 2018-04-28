@@ -194,7 +194,6 @@ public final class AppActions implements ActionComponent {
     }
 
     public boolean configAlgorithm(String algName) {
-//        PropertyManager manager = applicationTemplate.manager;
 
         AlgConfigDialog algConfigDialog = DataVisualizer.getAlgConfigDialog();
         

@@ -8,11 +8,11 @@ package components;
  */
 public class AlgorithmConfiguration {
 
-    int maxIterations;
-    int updateInterval;
-    boolean continuousRun;
+    public int maxIterations;
+    public int updateInterval;
+    public boolean continuousRun;
     private boolean clustering;
-    int numOfClusteringLabels;
+    public int numOfClusteringLabels;
 
     public AlgorithmConfiguration(int maxIterations, int updateInterval, boolean continuousRun, boolean clustering, int numOfClusteringLabels) {
         this.maxIterations = maxIterations;

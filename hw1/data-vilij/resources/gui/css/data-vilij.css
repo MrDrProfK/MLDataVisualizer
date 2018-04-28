@@ -11,7 +11,7 @@ and open the template in the editor.
 */
 .chart-vertical-zero-line,
 .chart-horizontal-zero-line,
-.chart-series-line,
+/*.chart-series-line,*/
 .chart-vertical-grid-lines,
 .chart-horizontal-grid-lines {
     -fx-stroke: transparent;
