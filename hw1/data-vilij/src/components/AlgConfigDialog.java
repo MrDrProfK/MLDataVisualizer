@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 
 /**
@@ -39,10 +40,10 @@ public class AlgConfigDialog extends Stage {
     private AlgorithmConfiguration newAlgConfig;
 
     private Option selectedOption;
-    private TextField numOfClusteringLabels;
+    private TextField maxIterationsField;
     private TextField updateInterval;
     private final Label clusterLabel = new Label("# of Clusters:");
-    private TextField clustering;
+    private TextField numOfClusteringLabels;
     private CheckBox continuousRun;
 
     private AlgConfigDialog() {
@@ -78,19 +79,19 @@ public class AlgConfigDialog extends Stage {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        numOfClusteringLabels = new TextField();
+        maxIterationsField = new TextField();
         updateInterval = new TextField();
-        clustering = new TextField();
+        numOfClusteringLabels = new TextField();
         continuousRun = new CheckBox("Continuous Run");
 
         continuousRun.setIndeterminate(false);
 
         grid.add(new Label("Max. Iterations:"), 0, 0);
-        grid.add(numOfClusteringLabels, 1, 0);
+        grid.add(maxIterationsField, 1, 0);
         grid.add(new Label("Update Interval:"), 0, 1);
         grid.add(updateInterval, 1, 1);
         grid.add(clusterLabel, 0, 2);
-        grid.add(clustering, 1, 2);
+        grid.add(numOfClusteringLabels, 1, 2);
         grid.add(continuousRun, 1, 3);
 
         HBox buttonBox = new HBox(5);
@@ -107,57 +108,73 @@ public class AlgConfigDialog extends Stage {
     /**
      *
      * @param algConfig
-//     * @return
+     * @return
      */
-//    public AlgorithmConfiguration show(AlgorithmConfiguration algConfig) {
-    public void show(AlgorithmConfiguration algConfig) {
+    public boolean show(AlgorithmConfiguration algConfig) {
 
         // set the title of the dialog
         setTitle("Algorithm Run Configuration");
 
-        this.numOfClusteringLabels.setText(Integer.toString(algConfig.numOfClusteringLabels));
+        this.maxIterationsField.setText(Integer.toString(algConfig.maxIterations));
         this.updateInterval.setText(Integer.toString(algConfig.updateInterval));
         this.continuousRun.setSelected(algConfig.continuousRun == true);
 
-        clusterLabel.setVisible(algConfig.clustering);
-        this.clustering.setVisible(algConfig.clustering);
-        this.clustering.setText(Integer.toString(algConfig.numOfClusteringLabels));
+        clusterLabel.setVisible(algConfig.isClustering());
+        this.numOfClusteringLabels.setVisible(algConfig.isClustering());
+        this.numOfClusteringLabels.setText(Integer.toString(algConfig.numOfClusteringLabels));
 
-        newAlgConfig = new AlgorithmConfiguration(algConfig.numOfClusteringLabels,
+        newAlgConfig = new AlgorithmConfiguration(algConfig.maxIterations,
                 algConfig.updateInterval, algConfig.continuousRun,
-                algConfig.clustering, algConfig.numOfClusteringLabels);
+                algConfig.isClustering(), algConfig.numOfClusteringLabels);
 
-        this.numOfClusteringLabels.setOnAction(e -> {
-            validatenumOfClusteringLabels();
+        this.maxIterationsField.setOnKeyPressed(key -> {
+            if (key.getCode() == KeyCode.TAB || key.getCode() == KeyCode.ENTER) {
+                validateMaxIterationsField();
+            }
         });
 
-        this.updateInterval.setOnAction(e -> {
-            validateUpdateInterval();
+        this.updateInterval.setOnKeyPressed(key -> {
+            if (key.getCode() == KeyCode.TAB || key.getCode() == KeyCode.ENTER) {
+                validateUpdateInterval();
+            }
         });
 
-        this.clustering.setOnAction(e -> {
-            validateNumOfClusteringLabels();
+        this.numOfClusteringLabels.setOnKeyPressed(key -> {
+            if (key.getCode() == KeyCode.TAB || key.getCode() == KeyCode.ENTER) {
+                validateNumOfClusteringLabels();
+            }
         });
         // open the dialog and wait for the user to click the close button
         showAndWait();
 
         if (selectedOption == Option.OK) {
-//            return newAlgConfig;
-            algConfig = newAlgConfig;
+            validateMaxIterationsField();
+            algConfig.maxIterations = newAlgConfig.maxIterations;
+            validateUpdateInterval();
+            algConfig.updateInterval = newAlgConfig.updateInterval;
+            algConfig.continuousRun = newAlgConfig.continuousRun;
+            
+            if (algConfig.clustering) {
+
+                validateNumOfClusteringLabels();
+                algConfig.numOfClusteringLabels = newAlgConfig.numOfClusteringLabels;
+            }
+
+            return true;
         } else {
-//            return algConfig;
+            return false;
         }
     }
 
-    private void validatenumOfClusteringLabels() {
+    private void validateMaxIterationsField() {
         try {
-            newAlgConfig.numOfClusteringLabels = Integer.valueOf(this.numOfClusteringLabels.getText());
-            if (newAlgConfig.numOfClusteringLabels < 1) {
-                newAlgConfig.numOfClusteringLabels = 1;
-                this.numOfClusteringLabels.setText(Integer.toString(newAlgConfig.numOfClusteringLabels));
+            newAlgConfig.maxIterations = Integer.valueOf(this.maxIterationsField.getText());
+            if (newAlgConfig.maxIterations < 1) {
+                newAlgConfig.maxIterations = 1;
+                this.maxIterationsField.setText(Integer.toString(newAlgConfig.maxIterations));
             }
         } catch (NumberFormatException ex) {
-            this.numOfClusteringLabels.setText(Integer.toString(newAlgConfig.numOfClusteringLabels));
+            this.maxIterationsField.setText(Integer.toString(newAlgConfig.maxIterations));
         }
     }
 
