@@ -152,7 +152,7 @@ public final class TSDProcessor {
      * Checks data for improper formatting/errors.
      * 
      * @param str   data to be analyzed
-     * @return      -1 if no formatting errors are found.
+     * @return      unique data labels
      * @throws      java.lang.Exception if data is improper w/ the line number
      *              corresponding to the improper data/format
      */
