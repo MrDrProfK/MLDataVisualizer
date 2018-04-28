@@ -60,14 +60,12 @@ public final class AppUI extends UITemplate {
 
     private Button editToggle;                      // toggle for edit/done functionality
     private ChoiceBox selectAlgType;                // drop-down for algorithm type selection
-    private HBox algOptionsPane;                    // pane to show different algorithms for a specified type
     
-    private ArrayList<RadioButton> algorithmBtns;   // radio buttons for algorithm selection
-    private Button configAlgBtn;                    // button to open algorithm configuration window
     private final VBox leftColumn = new VBox();     // create first column
-    
+    private VBox algorithmPane;
     private Label inputDataDetails;                 // 
     private final HBox editTogglePane = new HBox(); // 
+    private ToggleGroup group;                      //
     
     public LineChart<Number, Number> getChart() {
         return chart;
@@ -137,7 +135,16 @@ public final class AppUI extends UITemplate {
         // clear data contained in the ArrayLists
         firstTenLines = null;
         restOfTheLines = null;
+        // clear HashMap data containing custom algorithm
+        ((AppActions) applicationTemplate.getActionComponent()).clear();
         
+        if (group.getSelectedToggle() != null) {
+
+            ((RadioButton) group.getSelectedToggle()).setSelected(false);
+        }
+
+        runButton.setVisible(false);
+
         if (selectAlgType.getItems().size() < 3) {
             selectAlgType.getItems().add(1, "Classification");
         }
@@ -151,7 +158,7 @@ public final class AppUI extends UITemplate {
         dataFileLabel.setPadding(new Insets(0, 0, -35, 0));
         textArea = new TextArea();
         runButton = new Button("Run");
-//        runButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON_TEXT.name()));
+        runButton.setVisible(false);
        
         editToggle = new Button("Done");
         
@@ -165,22 +172,6 @@ public final class AppUI extends UITemplate {
         selectAlgType = new ChoiceBox(FXCollections.observableArrayList("Algorithm Type", "Classification", "Clustering"));
         selectAlgType.getSelectionModel().selectFirst();
         
-        ToggleGroup group = new ToggleGroup();
-        
-        algorithmBtns = new ArrayList<>();
-        algorithmBtns.add(new RadioButton("Random Classification"));
-        algorithmBtns.forEach(rb -> rb.setToggleGroup(group));
-        
-//        algorithmBtns.get(0) = new RadioButton("Random Classification");
-//        algorithmBtns.get(0).setToggleGroup(group);
-        algorithmBtns.get(0).setSelected(true);
-        
-        Image imageOk = new Image(runConfigIconPath);
-        configAlgBtn = new Button("", new ImageView(imageOk));
-
-//        RadioButton alg2 = new RadioButton("Random Classification 2");
-//        alg2.setToggleGroup(group);
-        
         leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
         leftColumn.getChildren().add(dataFileLabel);
@@ -188,16 +179,15 @@ public final class AppUI extends UITemplate {
         leftColumn.getChildren().add(textArea);
         leftColumn.getChildren().add(inputDataDetails);
         leftColumn.getChildren().add(selectAlgType);
+        
+        algorithmPane = new VBox();
         // TODO:    iterate over ArrayList of algorithms for the given algorithm type
         //          and add the elements to the column
-        algOptionsPane = new HBox();
-        algOptionsPane.setAlignment(Pos.CENTER_LEFT);
-        algorithmBtns.get(0).setPadding(new Insets(0, 0, 0, 5));
-        algOptionsPane.getChildren().add(configAlgBtn);
-        algOptionsPane.getChildren().add(algorithmBtns.get(0));
-        algOptionsPane.setVisible(false);
-        leftColumn.getChildren().add(algOptionsPane);
-        leftColumn.getChildren().add(runButton);
+        // MOVED CODE
+        
+        group = new ToggleGroup();
+
+        leftColumn.getChildren().addAll(algorithmPane, runButton);
 
         // align and space UI objects within the column
         leftColumn.setAlignment(Pos.TOP_CENTER);
@@ -221,13 +211,9 @@ public final class AppUI extends UITemplate {
         rightColumn.setAlignment(Pos.TOP_CENTER);
         rightColumn.setPadding(new Insets(10, 20, 0, 0));
 
-        // create a pane to hold both columns
-        HBox hbox = new HBox();
         // add both columns (leftColumn and rightColumn) to the HBox pane
-        hbox.getChildren().addAll(leftColumn, rightColumn);
-
         // add the pane containing both columns to inside of pre-existing VBox root pane
-        appPane.getChildren().add(hbox);
+        appPane.getChildren().add(new HBox(leftColumn, rightColumn));
         
         // add custom style to application
         getPrimaryScene().getStylesheets().add("gui/css/data-vilij.css");
@@ -235,21 +221,65 @@ public final class AppUI extends UITemplate {
 
     private void setWorkspaceActions() {
         hasNewText = false;
-
-        configAlgBtn.setOnAction(e -> ((AppActions) applicationTemplate.getActionComponent()).configAlgorithm("RandomClassifier"));
         
         selectAlgType.setOnAction(e -> {
+            // clear HashMap data containing custom algorithm
+            ((AppActions) applicationTemplate.getActionComponent()).clear();
+            
+            if (group.getSelectedToggle() != null) {
+                ((RadioButton) group.getSelectedToggle()).setSelected(false);
+            }
+
+            runButton.setVisible(false);
+            algorithmPane.setVisible(false);
+            algorithmPane.getChildren().clear();
+
+            int algConfigSize;
+            Iterator algNameItr;
             switch (selectAlgType.getSelectionModel().getSelectedItem().toString()) {
                 case "Classification":
-                    algorithmBtns.get(0).setText("Random Classification");
-                    algOptionsPane.setVisible(true);
+                    algConfigSize = ((AppActions) applicationTemplate.getActionComponent()).getConfigAlg(0).size();
+                    algNameItr = ((AppActions) applicationTemplate.getActionComponent()).getConfigAlg(0).keySet().iterator();
+
+                    for (int i = 0; i < algConfigSize; i++) {
+                        HBox hb         = new HBox();
+                        RadioButton rb  = new RadioButton(algNameItr.next().toString());
+
+                        rb.setToggleGroup(group);
+                        rb.setPadding(new Insets(0, 0, 0, 5));
+
+                        // add new algorithm configuration settings button
+                        hb.getChildren().add(new Button("", new ImageView(new Image(runConfigIconPath))));
+                        hb.getChildren().add(rb);
+                        hb.setAlignment(Pos.CENTER_LEFT);
+                        
+                        algorithmPane.getChildren().add(hb);
+                    }
+                    setClassificationConfigSectionControls();
+                    algorithmPane.setVisible(true);
                     break;
                 case "Clustering":
-                    algorithmBtns.get(0).setText("Random Clustering");
-                    algOptionsPane.setVisible(true);
+                    algConfigSize = ((AppActions) applicationTemplate.getActionComponent()).getConfigAlg(1).size();
+                    algNameItr = ((AppActions) applicationTemplate.getActionComponent()).getConfigAlg(1).keySet().iterator();
+
+                    for (int i = 0; i < algConfigSize; i++) {
+                        HBox hb         = new HBox();
+                        RadioButton rb  = new RadioButton(algNameItr.next().toString());
+
+                        rb.setToggleGroup(group);
+                        rb.setPadding(new Insets(0, 0, 0, 5));
+
+                        // add new algorithm configuration settings button
+                        hb.getChildren().add(new Button("", new ImageView(new Image(runConfigIconPath))));
+                        hb.getChildren().add(rb);
+                        hb.setAlignment(Pos.CENTER_LEFT);
+
+                        algorithmPane.getChildren().add(hb);
+                    }
+                    setClusteringConfigSectionControls();
+                    algorithmPane.setVisible(true);
                     break;
                 default:
-                    algOptionsPane.setVisible(false);
                     break;
             }
         });
@@ -291,6 +321,8 @@ public final class AppUI extends UITemplate {
 //                }
 //                // load data into the data processor...
 //                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
+                // display original dataset
+                ((AppData) applicationTemplate.getDataComponent()).displayData();
                 // if data is plotted...
                 if (!chart.getData().isEmpty()) {
                     // allow the user to take a screenshot of the chart
@@ -417,5 +449,58 @@ public final class AppUI extends UITemplate {
         }
         
         inputDataDetails.setText(detailsStr);
+    }
+    
+    private void setClassificationConfigSectionControls(){
+        algorithmPane.getChildren().forEach(p -> {
+            ((Button) ((HBox) p).getChildren().get(0)).setOnAction(e -> {
+                ((AppActions) applicationTemplate.getActionComponent())
+                        .configAlgorithm(((RadioButton) ((HBox) p).getChildren().get(1)).getText());
+                
+                try {
+                    if (((AppActions) applicationTemplate.getActionComponent())
+                            .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
+
+                        runButton.setVisible(true);
+                    }
+                } catch (NullPointerException npe) {
+                    // do nothing except suppress the exception
+                }
+            });
+
+            ((RadioButton) ((HBox) p).getChildren().get(1)).setOnAction(e -> {
+                    if (((AppActions) applicationTemplate.getActionComponent())
+                            .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
+
+                        runButton.setVisible(true);
+                    }
+            });
+        });
+    }
+    
+    private void setClusteringConfigSectionControls(){
+        algorithmPane.getChildren().forEach(p -> {
+            ((Button) ((HBox) p).getChildren().get(0)).setOnAction(e -> {
+                ((AppActions) applicationTemplate.getActionComponent())
+                        .configAlgorithm(((RadioButton) ((HBox) p).getChildren().get(1)).getText());
+                try {
+                    if (((AppActions) applicationTemplate.getActionComponent())
+                            .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
+
+                        runButton.setVisible(true);
+                    }
+                } catch (NullPointerException npe) {
+                    // do nothing except suppress the exception
+                }
+            });
+            
+            ((RadioButton) ((HBox) p).getChildren().get(1)).setOnAction(e -> {
+                if (((AppActions) applicationTemplate.getActionComponent())
+                        .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
+                    
+                    runButton.setVisible(true);
+                }
+            });
+        });
     }
 }
