@@ -38,7 +38,8 @@ public final class AppActions implements ActionComponent {
      */
     Path dataFilePath;
     
-    HashMap<String, AlgorithmConfiguration> algConfigs;
+    HashMap<String, AlgorithmConfiguration> classificationAlgConfigs;
+    HashMap<String, AlgorithmConfiguration> clusteringAlgConfigs;
 
     /**
      * Indicates whether or not a new request is occurring for the first time
@@ -47,9 +48,12 @@ public final class AppActions implements ActionComponent {
     private boolean firstNewRequest;
 
     public AppActions(ApplicationTemplate applicationTemplate) {
-        this.applicationTemplate = applicationTemplate;
-        firstNewRequest = true;
-        algConfigs = new HashMap<>();
+        this.applicationTemplate    = applicationTemplate;
+        firstNewRequest             = true;
+        classificationAlgConfigs    = new HashMap<>();
+        clusteringAlgConfigs        = new HashMap<>();
+        
+        clear();
     }
 
     @Override
@@ -192,13 +196,60 @@ public final class AppActions implements ActionComponent {
     public boolean configAlgorithm(String algName) {
 //        PropertyManager manager = applicationTemplate.manager;
 
-        if (algConfigs.get(algName) == null) {
-            algConfigs.put(algName, new AlgorithmConfiguration(10000, 5, true, true, 4));
-        }
-        
         AlgConfigDialog algConfigDialog = DataVisualizer.getAlgConfigDialog();
-        algConfigDialog.show(algConfigs.get(algName));
+        
+        if (classificationAlgConfigs.containsKey(algName)) {
+            if (classificationAlgConfigs.get(algName) == null) {
+                AlgorithmConfiguration defaultClassificationConfig = new AlgorithmConfiguration(1000, 5, true, false, 4);
 
-        return true;
+                if (algConfigDialog.show(defaultClassificationConfig)) {
+                    // save potentially modified configuration settings
+                    classificationAlgConfigs.put(algName, defaultClassificationConfig);
+                    return true;
+                }
+            } else {
+                if (algConfigDialog.show(classificationAlgConfigs.get(algName))) {
+                    // save potentially modified configuration settings
+                    classificationAlgConfigs.put(algName, classificationAlgConfigs.get(algName));
+                    return true;
+                }
+            }
+        }
+
+        if (clusteringAlgConfigs.containsKey(algName)) {
+            if (clusteringAlgConfigs.get(algName) == null) {
+                AlgorithmConfiguration defaultClusteringConfig = new AlgorithmConfiguration(1000, 5, true, true, 4);
+
+                if (algConfigDialog.show(defaultClusteringConfig)) {
+                    // save potentially modified configuration settings
+                    clusteringAlgConfigs.put(algName, defaultClusteringConfig);
+                    return true;
+                }
+            } else {
+                if (algConfigDialog.show(clusteringAlgConfigs.get(algName))) {
+                    // save potentially modified configuration settings
+                    clusteringAlgConfigs.put(algName, clusteringAlgConfigs.get(algName));
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    public HashMap<String, AlgorithmConfiguration> getConfigAlg(int index) {
+        if (index == 0) {
+            return classificationAlgConfigs;
+        }
+
+        return clusteringAlgConfigs;
+    }
+    
+    public void clear() {
+        classificationAlgConfigs.clear();
+        clusteringAlgConfigs.clear();
+        
+        classificationAlgConfigs.put("Random Classification", null);
+        clusteringAlgConfigs.put("Random Clustering", null);
     }
 }
