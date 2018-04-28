@@ -2,8 +2,12 @@
 package ui;
 
 import actions.AppActions;
+import classification.RandomClassifier;
+import components.AlgorithmConfiguration;
+import data.DataSet;
 import dataprocessors.AppData;
 import static java.io.File.separator;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -66,6 +70,8 @@ public final class AppUI extends UITemplate {
     private Label inputDataDetails;                 // 
     private final HBox editTogglePane = new HBox(); // 
     private ToggleGroup group;                      //
+    private Path dataFilePath;                      //
+    private AlgorithmConfiguration currentAlgConfig;//
     
     public LineChart<Number, Number> getChart() {
         return chart;
@@ -224,7 +230,7 @@ public final class AppUI extends UITemplate {
         
         selectAlgType.setOnAction(e -> {
             // clear HashMap data containing custom algorithm
-            ((AppActions) applicationTemplate.getActionComponent()).clear();
+//            ((AppActions) applicationTemplate.getActionComponent()).clear();
             
             if (group.getSelectedToggle() != null) {
                 ((RadioButton) group.getSelectedToggle()).setSelected(false);
@@ -312,17 +318,33 @@ public final class AppUI extends UITemplate {
                 // DO NOT allow the user to take a screenshot of an empty chart
                 scrnshotButton.setDisable(true);
 
-//                String strToBeProcessed = textArea.getText();
-//                if (restOfTheLines != null) {
-//                    ListIterator<String> itr = restOfTheLines.listIterator();
-//                    while (itr.hasNext()) {
-//                        strToBeProcessed += "\n" + itr.next();
-//                    }
-//                }
-//                // load data into the data processor...
-//                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
+                // START PLOTTING ORIGINAL DATASET
+                String strToBeProcessed = textArea.getText();
+                if (restOfTheLines != null) {
+                    ListIterator<String> itr = restOfTheLines.listIterator();
+                    while (itr.hasNext()) {
+                        strToBeProcessed += "\n" + itr.next();
+                    }
+                }
+                // load data into the data processor...
+                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
+                
                 // display original dataset
                 ((AppData) applicationTemplate.getDataComponent()).displayData();
+                // END PLOTTING ORIGINAL DATASET
+          
+                try {
+                    System.out.println(this.dataFilePath);
+                    DataSet dataset = DataSet.fromTSDFile(this.dataFilePath);
+//                    System.out.println("max iter:" + currentAlgConfig.maxIterations + "\nupdate interval:" + currentAlgConfig.updateInterval + "\ncontinuous?:" + currentAlgConfig.continuousRun);
+                    RandomClassifier rc = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, getChart());
+//                    System.out.println(rc);
+                    Thread t = new Thread(rc);
+                    t.start();
+                } catch (IOException ex) {
+                    System.out.println(ex);
+                }
+
                 // if data is plotted...
                 if (!chart.getData().isEmpty()) {
                     // allow the user to take a screenshot of the chart
@@ -400,6 +422,7 @@ public final class AppUI extends UITemplate {
         editTogglePane.setVisible(false);
         leftColumn.setVisible(true);
         textArea.setDisable(true);
+        this.dataFilePath = dataFilePath;
         
         firstTenLines = new ArrayList<>();
         restOfTheLines = new ArrayList<>();
@@ -436,7 +459,7 @@ public final class AppUI extends UITemplate {
         
         String detailsStr = dataLoadedFromFile.size() + " instances with "
                 + uniqueDataLabels.size() + " labels loaded from "
-                + dataFilePath.getFileName() + " . The labels are:";
+                + dataFilePath + " . The labels are:";
 
         if (uniqueDataLabels.size() != 2) {
             // TODO: disable classification algorithm type
@@ -461,6 +484,8 @@ public final class AppUI extends UITemplate {
                     if (((AppActions) applicationTemplate.getActionComponent())
                             .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
 
+                        currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
+                                .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText());
                         runButton.setVisible(true);
                     }
                 } catch (NullPointerException npe) {
@@ -469,11 +494,13 @@ public final class AppUI extends UITemplate {
             });
 
             ((RadioButton) ((HBox) p).getChildren().get(1)).setOnAction(e -> {
-                    if (((AppActions) applicationTemplate.getActionComponent())
-                            .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
-
-                        runButton.setVisible(true);
-                    }
+                currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
+                        .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText());
+                if (currentAlgConfig != null) {
+                    runButton.setVisible(true);
+                } else {
+                    runButton.setVisible(false);
+                }
             });
         });
     }
@@ -487,18 +514,22 @@ public final class AppUI extends UITemplate {
                     if (((AppActions) applicationTemplate.getActionComponent())
                             .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
 
+                        currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
+                                .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText());
                         runButton.setVisible(true);
                     }
                 } catch (NullPointerException npe) {
                     // do nothing except suppress the exception
                 }
             });
-            
+           
             ((RadioButton) ((HBox) p).getChildren().get(1)).setOnAction(e -> {
-                if (((AppActions) applicationTemplate.getActionComponent())
-                        .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
-                    
+                currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
+                        .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText());
+                if (currentAlgConfig != null) {
                     runButton.setVisible(true);
+                } else {
+                    runButton.setVisible(false);
                 }
             });
         });
