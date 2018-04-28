@@ -11,7 +11,7 @@ public class AlgorithmConfiguration {
     int maxIterations;
     int updateInterval;
     boolean continuousRun;
-    boolean clustering;
+    private boolean clustering;
     int numOfClusteringLabels;
 
     public AlgorithmConfiguration(int maxIterations, int updateInterval, boolean continuousRun, boolean clustering, int numOfClusteringLabels) {
@@ -20,5 +20,9 @@ public class AlgorithmConfiguration {
         this.continuousRun = continuousRun;
         this.clustering = clustering;
         this.numOfClusteringLabels = numOfClusteringLabels;
+    }
+
+    public boolean isClustering() {
+        return clustering;
     }
 }

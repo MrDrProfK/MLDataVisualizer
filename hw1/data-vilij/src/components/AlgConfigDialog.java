@@ -154,7 +154,7 @@ public class AlgConfigDialog extends Stage {
             algConfig.updateInterval = newAlgConfig.updateInterval;
             algConfig.continuousRun = newAlgConfig.continuousRun;
             
-            if (algConfig.clustering) {
+            if (algConfig.isClustering()) {
 
                 validateNumOfClusteringLabels();
                 algConfig.numOfClusteringLabels = newAlgConfig.numOfClusteringLabels;
