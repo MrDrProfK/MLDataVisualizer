@@ -73,6 +73,8 @@ public final class AppUI extends UITemplate {
     private Path dataFilePath;                      //
     private AlgorithmConfiguration currentAlgConfig;//
     
+    private DataSet dataset;
+    
     public LineChart<Number, Number> getChart() {
         return chart;
     }
@@ -310,7 +312,6 @@ public final class AppUI extends UITemplate {
             }
         });
 
-        // when run button is clicked...
         runButton.setOnAction(e -> {
             if (hasNewText) {
                 // clear scatter chart immediately before plotting new data
@@ -318,7 +319,6 @@ public final class AppUI extends UITemplate {
                 // DO NOT allow the user to take a screenshot of an empty chart
                 scrnshotButton.setDisable(true);
 
-                // START PLOTTING ORIGINAL DATASET
                 String strToBeProcessed = textArea.getText();
                 if (restOfTheLines != null) {
                     ListIterator<String> itr = restOfTheLines.listIterator();
@@ -329,13 +329,13 @@ public final class AppUI extends UITemplate {
                 // load data into the data processor...
                 ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
                 
-                // display original dataset
-                ((AppData) applicationTemplate.getDataComponent()).displayData();
-                // END PLOTTING ORIGINAL DATASET
-          
                 try {
-                    System.out.println(this.dataFilePath);
-                    DataSet dataset = DataSet.fromTSDFile(this.dataFilePath);
+                    dataset = DataSet.fromTSDFile(this.dataFilePath);
+                    configureChartSettings();
+                    // START PLOTTING ORIGINAL DATASET
+                    ((AppData) applicationTemplate.getDataComponent()).displayData();
+                    // END PLOTTING ORIGINAL DATASET
+                    
 //                    System.out.println("max iter:" + currentAlgConfig.maxIterations + "\nupdate interval:" + currentAlgConfig.updateInterval + "\ncontinuous?:" + currentAlgConfig.continuousRun);
                     RandomClassifier rc = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, getChart());
 //                    System.out.println(rc);
@@ -474,6 +474,9 @@ public final class AppUI extends UITemplate {
         inputDataDetails.setText(detailsStr);
     }
     
+    /**
+     * Prepares UI for classification algorithm selection and configuration.
+     */
     private void setClassificationConfigSectionControls(){
         algorithmPane.getChildren().forEach(p -> {
             ((Button) ((HBox) p).getChildren().get(0)).setOnAction(e -> {
@@ -505,6 +508,9 @@ public final class AppUI extends UITemplate {
         });
     }
     
+    /**
+     * Prepares UI for clustering algorithm selection and configuration.
+     */
     private void setClusteringConfigSectionControls(){
         algorithmPane.getChildren().forEach(p -> {
             ((Button) ((HBox) p).getChildren().get(0)).setOnAction(e -> {
@@ -533,5 +539,39 @@ public final class AppUI extends UITemplate {
                 }
             });
         });
+    }
+    
+    /**
+     * Overrides chart auto-scaling and appropriately prepares the chart for the
+     * display of data and subsequent iterations of algorithms that are to 
+     * analyze the data.
+     */
+    private void configureChartSettings(){
+        double xMin = dataset.getBounds("xMin");
+        double xMax = dataset.getBounds("xMax");
+        double yMin = dataset.getBounds("yMin");
+        double yMax = dataset.getBounds("yMax");
+
+        double domainSize = xMax - xMin;
+        if (domainSize < 1) {
+            domainSize = 1;
+        }
+
+        double rangeSize = yMax - yMin;
+        if (rangeSize < 1) {
+            rangeSize = 1;
+        }
+        
+        NumberAxis xAxis = ((NumberAxis) chart.getXAxis());
+        xAxis.setAutoRanging(false);
+        xAxis.setLowerBound(xMin - (domainSize * .1));
+        xAxis.setUpperBound(xMax + (domainSize * .1));
+        xAxis.setTickUnit((xAxis.getUpperBound() - xAxis.getLowerBound()) / 10);
+
+        NumberAxis yAxis = ((NumberAxis) chart.getYAxis());
+        yAxis.setAutoRanging(false);
+        yAxis.setLowerBound(yMin - (domainSize * .2));
+        yAxis.setUpperBound(yMax + (domainSize * .2));
+        yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / 5);
     }
 }
