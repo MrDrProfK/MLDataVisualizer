@@ -44,11 +44,17 @@ public class DataSet {
 
     private Map<String, String>  labels;
     private Map<String, Point2D> locations;
+    private Map<String, Double> bounds;     // stores 2D DataSet boundaries
 
     /** Creates an empty dataset. */
     public DataSet() {
         labels = new HashMap<>();
         locations = new HashMap<>();
+        bounds = new HashMap<>();
+        bounds.put("xMin", null);
+        bounds.put("xMax", null);
+        bounds.put("yMin", null);
+        bounds.put("yMax", null);
     }
 
     public Map<String, String> getLabels()     { return labels; }
@@ -65,6 +71,7 @@ public class DataSet {
         String[] arr = tsdLine.split("\t");
         labels.put(nameFormatCheck(arr[0]), arr[1]);
         locations.put(arr[0], locationOf(arr[2]));
+        updateBounds(locationOf(arr[2]));
     }
 
     public static DataSet fromTSDFile(Path tsdFilePath) throws IOException {
@@ -77,5 +84,46 @@ public class DataSet {
             }
         });
         return dataset;
+    }
+ 
+    /**
+     * Updates the boundary records for the DataSet 
+     * (notably as instances are added to the locations Map).
+     * If no boundaries have been initialized yet, all boundaries will be 
+     * initialized to the coordinate value of the first instance added to the 
+     * locations Map.
+     * @param testPt 
+     */
+    private void updateBounds(Point2D testPt) {
+        if (bounds.get("xMin") == null) {
+            bounds.put("xMin", testPt.getX());
+            bounds.put("xMax", testPt.getX());
+            bounds.put("yMin", testPt.getY());
+            bounds.put("yMax", testPt.getY());
+        } else {
+            if (testPt.getX() < bounds.get("xMin")) {
+                bounds.put("xMin", testPt.getX());
+            } else if (testPt.getX() > bounds.get("xMax")) {
+                bounds.put("xMax", testPt.getX());
+            }
+            if (testPt.getY() < bounds.get("yMin")) {
+                bounds.put("yMin", testPt.getY());
+            } else if (testPt.getY() > bounds.get("yMax")) {
+                bounds.put("yMax", testPt.getY());
+            }
+        }
+    }
+
+    /**
+     * Used to ascertain the boundaries of the DataSet.
+     * @param boundName
+     * @return single boundary parameter of dataset
+     * @throws NullPointerException 
+     */
+    public double getBounds(String boundName) throws NullPointerException {
+        if (bounds.get(boundName) == null) {
+            throw new NullPointerException("Bound Not Found!");
+        }
+        return bounds.get(boundName);
     }
 }
