@@ -101,6 +101,7 @@ public final class TSDProcessor {
                 series.getData().add(new XYChart.Data<>(point.getX(), point.getY()));
             });
             chart.getData().add(series);
+            series.getNode().lookup(".chart-series-line").setStyle("-fx-stroke: transparent");
         }
         
     }
