@@ -16,10 +16,12 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import ui.AlgResourcePreparer;
 
 /**
- * @author Ritwik Banerjee
+ * @author Ritwik Banerjee & Aaron Knoll
  */
 public class RandomClassifier extends Classifier {
 
@@ -27,7 +29,7 @@ public class RandomClassifier extends Classifier {
 
     @SuppressWarnings("FieldCanBeLocal")
     // this mock classifier doesn't actually use the data, but a real classifier will
-    private DataSet dataset;
+    private final DataSet dataset;
 
     private final int maxIterations;
     private final int updateInterval;
@@ -36,10 +38,12 @@ public class RandomClassifier extends Classifier {
     private final AtomicBoolean tocontinue;
     
     private final AlgorithmPauser pauser;
-    //defining a series
-    private XYChart.Series series = new XYChart.Series();
+    // defining a series
+    private XYChart.Series series;
     private final LineChart<Number, Number> chart;
 
+    private final Label algNotificationLabel;
+    
     @Override
     public int getMaxIterations() {
         return maxIterations;
@@ -59,14 +63,16 @@ public class RandomClassifier extends Classifier {
                             int maxIterations,
                             int updateInterval,
                             boolean tocontinue, 
-                            LineChart<Number, Number> chart,
-                            AlgorithmPauser pauser) {
+                            AlgResourcePreparer arp) {
         this.dataset = dataset;
         this.maxIterations = maxIterations;
         this.updateInterval = updateInterval;
         this.tocontinue = new AtomicBoolean(tocontinue);
-        this.chart = chart;
-        this.pauser = pauser;
+        this.chart = arp.getChart();
+        this.pauser = arp.getPauser();
+        
+        algNotificationLabel = arp.getAlgNotificationLabel();
+        series = new XYChart.Series();
     }
 
     @Override
@@ -94,11 +100,11 @@ public class RandomClassifier extends Classifier {
             // everything below is just for internal viewing of how the output is changing
             // in the final project, such changes will be dynamically visible in the UI
             if (i % updateInterval == 0) {
-                System.out.printf("Iteration number %d: ", i);
+//                System.out.printf("Iteration number %d: ", i);
                 flush();
             }
             if (i > maxIterations * .6 && RAND.nextDouble() < 0.05) {
-                System.out.printf("Iteration number %d: ", i);
+//                System.out.printf("Iteration number %d: ", i);
                 flush();
                 break;
             }
@@ -119,7 +125,7 @@ public class RandomClassifier extends Classifier {
 
     // for internal viewing only
     protected void flush() {
-        System.out.printf("%d\t%d\t%d%n", output.get(0), output.get(1), output.get(2));
+//        System.out.printf("%d\t%d\t%d%n", output.get(0), output.get(1), output.get(2));
 
         double xMin = dataset.getBounds("xMin");
         double xMax = dataset.getBounds("xMax");
@@ -141,12 +147,13 @@ public class RandomClassifier extends Classifier {
         yMin -= (rangeSize * .05);
         yMax += (rangeSize * .05);
         
+        Platform.runLater(() -> {
+            algNotificationLabel.setText("");
+        });
+
         if (output.get(0) == 0 && output.get(1) == 0) {
             Platform.runLater(() -> {
-//                Alert alert = new Alert(AlertType.WARNING);
-//                alert.setTitle("ALERT");
-//                alert.setContentText("Degenerate line produced by classification algorithm.");
-//                alert.showAndWait();
+                algNotificationLabel.setText("Degenerate line produced by classification algorithm.");
             });
             return;
         }
@@ -176,10 +183,7 @@ public class RandomClassifier extends Classifier {
                 });
             } else {
                 Platform.runLater(() -> {
-//                    Alert alert = new Alert(AlertType.WARNING);
-//                    alert.setTitle("ALERT");
-//                    alert.setContentText("Line Out of Range.");
-//                    alert.showAndWait();
+                    algNotificationLabel.setText("Line Out of Range.");
                 });
                 return;
             }
@@ -208,81 +212,40 @@ public class RandomClassifier extends Classifier {
                 });
             } else {
                 Platform.runLater(() -> {
-//                    Alert alert = new Alert(AlertType.WARNING);
-//                    alert.setTitle("ALERT");
-//                    alert.setContentText("Line Out of Range.");
-//                    alert.showAndWait();
+                    algNotificationLabel.setText("Line Out of Range.");
                 });
                 return;
             }
         }
-        
+
         // y(xMin)
         double tempY1 = ((-output.get(0) * xMin) - output.get(2)) / output.get(1);
         // y(xMax)
         double tempY2 = ((-output.get(0) * xMax) - output.get(2)) / output.get(1);
-        
-        boolean slopeIsPos = true;
-        if (tempY1 > tempY2) {
-            slopeIsPos = false;
-        }
-        
-        if (slopeIsPos) {
-            if (tempY1 >= yMin && tempY1 <= yMax) {
-                pt1x = xMin;
-                pt1y = tempY1;
-            } else {
-                double tempX1 = ((-output.get(1) * yMin) - output.get(2)) / output.get(0);
-                if (tempX1 >= xMin && tempX1 <= xMax) {
-                    pt1x = tempX1;
-                    pt1y = yMin;
-                } else {
-                    Platform.runLater(() -> {
-//                        Alert alert = new Alert(AlertType.WARNING);
-//                        alert.setTitle("ALERT");
-//                        alert.setContentText("Line Out of Range.");
-//                        alert.showAndWait();
-                    });
-                    return;
-                }
-            }
 
-            if (tempY2 >= yMin && tempY2 <= yMax) {
-                pt2x = xMax;
-                pt2y = tempY2;
-            } else {
-                double tempX2 = ((-output.get(1) * yMax) - output.get(2)) / output.get(0);
-                pt2x = tempX2;
-                pt2y = yMin;
-            }
+        if (tempY1 >= yMin && tempY1 <= yMax) {
+            pt1x = xMin;
+            pt1y = tempY1;
         } else {
-            if (tempY1 >= yMin && tempY1 <= yMax) {
-                pt1x = xMin;
-                pt1y = tempY1;
+            double tempX1 = ((-output.get(1) * yMax) - output.get(2)) / output.get(0);
+            if (tempX1 >= xMin && tempX1 <= xMax) {
+                pt1x = tempX1;
+                pt1y = yMax;
             } else {
-                double tempX1 = ((-output.get(1) * yMax) - output.get(2)) / output.get(0);
-                if (tempX1 >= xMin && tempX1 <= xMax) {
-                    pt1x = tempX1;
-                    pt1y = yMax;
-                } else {
-                    Platform.runLater(() -> {
-//                        Alert alert = new Alert(AlertType.WARNING);
-//                        alert.setTitle("ALERT");
-//                        alert.setContentText("Line Out of Range.");
-//                        alert.showAndWait();
-                    });
-                    return;
-                }
+                Platform.runLater(() -> {
+                    algNotificationLabel.setText("Line Out of Range.");
+                });
+                return;
             }
+        }
 
-            if (tempY2 >= yMin && tempY2 <= yMax) {
-                pt2x = xMax;
-                pt2y = tempY2;
-            } else {
-                double tempX2 = ((-output.get(1) * yMin) - output.get(2)) / output.get(0);
-                pt2x = tempX2;
-                pt2y = yMin;
-            }
+        if (tempY2 >= yMin && tempY2 <= yMax) {
+            pt2x = xMax;
+            pt2y = tempY2;
+        } else {
+            double tempX2 = ((-output.get(1) * yMin) - output.get(2)) / output.get(0);
+            pt2x = tempX2;
+            pt2y = yMin;
         }
 
 //        System.out.println("pt1x: " + pt1x + " pt1y: " + pt1y + " pt2x: " + pt2x + " pt2y: " + pt2y);
