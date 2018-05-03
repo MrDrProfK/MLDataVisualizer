@@ -103,7 +103,7 @@ public class RandomClassifier extends Classifier {
                 break;
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(300);
             } catch (InterruptedException ex) {
                 Logger.getLogger(RandomClassifier.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -159,20 +159,16 @@ public class RandomClassifier extends Classifier {
                 pt1x = xMin;
                 pt2x = xMax;
                 pt1y = pt2y = y;
-final double pt1xfinal, pt1yfinal, pt2xfinal, pt2yfinal;
-        pt1xfinal = pt1x;
-        pt1yfinal = pt1y;
-        pt2xfinal = pt2x;
-        pt2yfinal = pt2y;
-                Platform.runLater(() -> {
-                    
-                series.getData().clear();
                 
-                series.getData().addAll(new XYChart.Data(pt1xfinal, pt1yfinal),new XYChart.Data(pt2xfinal, pt2yfinal));
-//                    if (chart.getData().get(chart.getData().size() - 1).getName().compareTo(series.getName()) == 0) {
-//                        chart.getData().remove(chart.getData().size() - 1);
-//                    }
-//                    chart.getData().add(series);
+                final double pt1xfinal = pt1x;
+                final double pt1yfinal = pt1y;
+                final double pt2xfinal = pt2x;
+                final double pt2yfinal = pt2y;
+                
+                Platform.runLater(() -> {
+                    series.getData().clear();
+                    //populating the series with data
+                    series.getData().addAll(new XYChart.Data(pt1xfinal, pt1yfinal), new XYChart.Data(pt2xfinal, pt2yfinal));
                     for (XYChart.Data<Number, Number> dataPt : ((XYChart.Series<Number, Number>) series).getData()) {
                         StackPane stackPane = (StackPane) dataPt.getNode();
                         stackPane.setVisible(false);
@@ -195,20 +191,16 @@ final double pt1xfinal, pt1yfinal, pt2xfinal, pt2yfinal;
                 pt1x = pt2x = x;
                 pt1y = yMin;
                 pt2y = yMax;
-                final double pt1xfinal, pt1yfinal, pt2xfinal, pt2yfinal;
-                pt1xfinal = pt1x;
-                pt1yfinal = pt1y;
-                pt2xfinal = pt2x;
-                pt2yfinal = pt2y;
+                
+                final double pt1xfinal = pt1x;
+                final double pt1yfinal = pt1y;
+                final double pt2xfinal = pt2x;
+                final double pt2yfinal = pt2y;
+                
                 Platform.runLater(() -> {
-
                     series.getData().clear();
-                                    series.getData().addAll(new XYChart.Data(pt1xfinal, pt1yfinal),new XYChart.Data(pt2xfinal, pt2yfinal));
-
-//                    if (chart.getData().get(chart.getData().size() - 1).getName().compareTo(series.getName()) == 0) {
-//                        chart.getData().remove(chart.getData().size() - 1);
-//                    }
-//                    chart.getData().add(series);
+                    //populating the series with data
+                    series.getData().addAll(new XYChart.Data(pt1xfinal, pt1yfinal), new XYChart.Data(pt2xfinal, pt2yfinal));
                     for (XYChart.Data<Number, Number> dataPt : ((XYChart.Series<Number, Number>) series).getData()) {
                         StackPane stackPane = (StackPane) dataPt.getNode();
                         stackPane.setVisible(false);
@@ -294,28 +286,19 @@ final double pt1xfinal, pt1yfinal, pt2xfinal, pt2yfinal;
         }
 
 //        System.out.println("pt1x: " + pt1x + " pt1y: " + pt1y + " pt2x: " + pt2x + " pt2y: " + pt2y);
+        final double pt1xfinal = pt1x;
+        final double pt1yfinal = pt1y;
+        final double pt2xfinal = pt2x;
+        final double pt2yfinal = pt2y;
         
-        
-        final double pt1xfinal, pt1yfinal, pt2xfinal, pt2yfinal;
-        pt1xfinal = pt1x;
-        pt1yfinal = pt1y;
-        pt2xfinal = pt2x;
-        pt2yfinal = pt2y;
         Platform.runLater(() -> {
-//populating the series with data
             series.getData().clear();
+            //populating the series with data
             series.getData().addAll(new XYChart.Data(pt1xfinal, pt1yfinal), new XYChart.Data(pt2xfinal, pt2yfinal));
-
-//            if (chart.getData().get(chart.getData().size() - 1).getName().compareTo(series.getName()) == 0) {
-//                chart.getData().remove(chart.getData().size() - 1);
-//            }
-//
-//            chart.getData().add(series);
-            for(XYChart.Data<Number, Number> dataPt : ((XYChart.Series<Number, Number>) series).getData()){
+            for (XYChart.Data<Number, Number> dataPt : ((XYChart.Series<Number, Number>) series).getData()) {
                 StackPane stackPane = (StackPane) dataPt.getNode();
                 stackPane.setVisible(false);
             }
-//            series.getNode().lookup(".chart-series-line").setStyle("-fx-background-color: transparent, transparent;");
         });
     }
 
