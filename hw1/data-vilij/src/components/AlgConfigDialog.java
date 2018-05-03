@@ -117,7 +117,7 @@ public class AlgConfigDialog extends Stage {
 
         this.maxIterationsField.setText(Integer.toString(algConfig.maxIterations));
         this.updateInterval.setText(Integer.toString(algConfig.updateInterval));
-        this.continuousRun.setSelected(algConfig.continuousRun == true);
+        this.continuousRun.setSelected(algConfig.continuousRun);
 
         clusterLabel.setVisible(algConfig.isClustering());
         this.numOfClusteringLabels.setVisible(algConfig.isClustering());
@@ -152,7 +152,7 @@ public class AlgConfigDialog extends Stage {
             algConfig.maxIterations = newAlgConfig.maxIterations;
             validateUpdateInterval();
             algConfig.updateInterval = newAlgConfig.updateInterval;
-            algConfig.continuousRun = newAlgConfig.continuousRun;
+            algConfig.continuousRun = continuousRun.isSelected();
             
             if (algConfig.isClustering()) {
 
