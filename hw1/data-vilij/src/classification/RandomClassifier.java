@@ -34,9 +34,11 @@ public class RandomClassifier extends Classifier {
     private final int maxIterations;
     private final int updateInterval;
 
+    // TRUE if in continuous run mode, otherwise FALSE
     // currently, this value does not change after instantiation
     private final AtomicBoolean tocontinue;
     
+    private final AlgResourcePreparer arp;
     private final AlgorithmPauser pauser;
     // defining a series
     private XYChart.Series series;
@@ -62,17 +64,19 @@ public class RandomClassifier extends Classifier {
     public RandomClassifier(DataSet dataset,
                             int maxIterations,
                             int updateInterval,
-                            boolean tocontinue, 
+                            boolean tocontinue,
                             AlgResourcePreparer arp) {
-        this.dataset = dataset;
-        this.maxIterations = maxIterations;
+        
+        this.dataset        = dataset;
+        this.maxIterations  = maxIterations;
         this.updateInterval = updateInterval;
-        this.tocontinue = new AtomicBoolean(tocontinue);
-        this.chart = arp.getChart();
-        this.pauser = arp.getPauser();
+        this.tocontinue     = new AtomicBoolean(tocontinue);
+        this.chart          = arp.getChart();
+        this.pauser         = arp.getPauser();
         
         algNotificationLabel = arp.getAlgNotificationLabel();
         series = new XYChart.Series();
+        this.arp = arp;
     }
 
     @Override
@@ -82,7 +86,7 @@ public class RandomClassifier extends Classifier {
             chart.setAnimated(false);
             chart.getData().add(series);
         });
-//        for (int i = 1; i <= maxIterations && tocontinue(); i++) {
+        
         for (int i = 1; i <= maxIterations; i++) {
             try {
                 pauser.shouldIPause();
@@ -101,26 +105,39 @@ public class RandomClassifier extends Classifier {
             // in the final project, such changes will be dynamically visible in the UI
             if (i % updateInterval == 0) {
 //                System.out.printf("Iteration number %d: ", i);
+//                System.out.println("clicked");
                 flush();
+                if (!tocontinue()) {
+                    pauser.pause();
+                    Platform.runLater(() -> {
+                        arp.alternateRunPause();
+                    });
+                }
             }
             if (i > maxIterations * .6 && RAND.nextDouble() < 0.05) {
 //                System.out.printf("Iteration number %d: ", i);
-                flush();
+//                flush();
+//                System.out.println("An Early Break!");
                 break;
             }
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(RandomClassifier.class.getName()).log(Level.SEVERE, null, ex);
+            
+            if (tocontinue()) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(RandomClassifier.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
+        
         Platform.runLater(() -> {
-                Alert alert = new Alert(AlertType.WARNING);
-                alert.setTitle("ALERT");
-                alert.setHeaderText("");
-                alert.setContentText("Algorithm Run Complete!");
-                alert.showAndWait();
-            });
+            arp.alternateRunPause();
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("ALERT");
+            alert.setHeaderText("");
+            alert.setContentText("Algorithm Run Complete!");
+            alert.showAndWait();
+        });
     }
 
     // for internal viewing only
@@ -153,7 +170,8 @@ public class RandomClassifier extends Classifier {
 
         if (output.get(0) == 0 && output.get(1) == 0) {
             Platform.runLater(() -> {
-                algNotificationLabel.setText("Degenerate line produced by classification algorithm.");
+                algNotificationLabel.setText("Degenerate line produced by"
+                        + " classification algorithm.");
             });
             return;
         }
