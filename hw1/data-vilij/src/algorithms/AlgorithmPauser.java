@@ -26,7 +26,7 @@ public class AlgorithmPauser {
      * @throws InterruptedException
      */
     public synchronized void shouldIPause() throws InterruptedException {
-        while (!isPaused) {
+        while (isPaused) {
             wait();
         }
     }
