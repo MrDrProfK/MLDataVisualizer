@@ -37,7 +37,8 @@ public class AppData implements DataComponent {
     public void loadData(Path dataFilePath) {
         // TODO for homework 2
         PropertyManager manager = applicationTemplate.manager;
-        
+        // clear data from data processor
+        clear();
         try{
             // load data from file if file is NOT null
             FileReader fileReader = new FileReader(dataFilePath.toFile());
@@ -74,13 +75,12 @@ public class AppData implements DataComponent {
                     .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
                             ex.getMessage());
         }
-        // clear data from data processor
-        clear();
     }
 
     public boolean loadData(String dataString) {
         // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
+        clear();
         try {
             if (processor.getErrorLineNumber(dataString) != null) {
                 // plot data
@@ -95,8 +95,6 @@ public class AppData implements DataComponent {
         
         // if data was successfully loaded
         return true;
-        // clear data from data processor
-//        clear();
     }
 
     @Override

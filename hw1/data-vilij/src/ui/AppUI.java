@@ -2,6 +2,7 @@
 package ui;
 
 import actions.AppActions;
+import algorithms.AlgorithmPauser;
 import classification.RandomClassifier;
 import components.AlgorithmConfiguration;
 import data.DataSet;
@@ -53,7 +54,7 @@ public final class AppUI extends UITemplate {
     private Button scrnshotButton;                  // toolbar button to take a screenshot of the data
     private LineChart<Number, Number> chart;        // the chart where data will be displayed (LineChart version of original chart)
 
-    private Button runButton;                       // workspace button to display data on the chart
+    private Button runPauseBtn;                       // workspace button to display data on the chart
     private TextArea textArea;                      // text area for new data input
     private boolean hasNewText;                     // whether or not the text area has any new data since last display
 
@@ -74,6 +75,7 @@ public final class AppUI extends UITemplate {
     private AlgorithmConfiguration currentAlgConfig;//
     
     private DataSet dataset;
+    private AlgorithmPauser pauser = new AlgorithmPauser();
     
     public LineChart<Number, Number> getChart() {
         return chart;
@@ -151,7 +153,7 @@ public final class AppUI extends UITemplate {
             ((RadioButton) group.getSelectedToggle()).setSelected(false);
         }
 
-        runButton.setVisible(false);
+        runPauseBtn.setVisible(false);
 
         if (selectAlgType.getItems().size() < 3) {
             selectAlgType.getItems().add(1, "Classification");
@@ -160,13 +162,14 @@ public final class AppUI extends UITemplate {
 
     private void layout() {
         PropertyManager manager = applicationTemplate.manager;
+        scrnshotButton.setDisable(true);
         // declare/initialize UI objects to be included in the first column
         Label dataFileLabel = new Label(manager.getPropertyValue(DATA_FILE_LABEL_TEXT.name()));
         dataFileLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         dataFileLabel.setPadding(new Insets(0, 0, -35, 0));
         textArea = new TextArea();
-        runButton = new Button("Run");
-        runButton.setVisible(false);
+        runPauseBtn = new Button("Run");
+        runPauseBtn.setVisible(false);
        
         editToggle = new Button("Done");
         
@@ -195,7 +198,7 @@ public final class AppUI extends UITemplate {
         
         group = new ToggleGroup();
 
-        leftColumn.getChildren().addAll(algorithmPane, runButton);
+        leftColumn.getChildren().addAll(algorithmPane, runPauseBtn);
 
         // align and space UI objects within the column
         leftColumn.setAlignment(Pos.TOP_CENTER);
@@ -238,7 +241,7 @@ public final class AppUI extends UITemplate {
                 ((RadioButton) group.getSelectedToggle()).setSelected(false);
             }
 
-            runButton.setVisible(false);
+            runPauseBtn.setVisible(false);
             algorithmPane.setVisible(false);
             algorithmPane.getChildren().clear();
 
@@ -312,44 +315,42 @@ public final class AppUI extends UITemplate {
             }
         });
 
-        runButton.setOnAction(e -> {
+        runPauseBtn.setOnAction(e -> {
+         
+            switch (runPauseBtn.getText()) {
+                case "Run":
+                    pauser.resume();
+                    scrnshotButton.setDisable(true);
+                    runPauseBtn.setText("Pause");
+                    break;
+                case "Pause":
+                    pauser.pause();
+                    scrnshotButton.setDisable(false);
+                    runPauseBtn.setText("Run");
+                    break;
+                default:
+                    break;
+            }
+
             if (hasNewText) {
                 // clear scatter chart immediately before plotting new data
                 chart.getData().clear();
-                // DO NOT allow the user to take a screenshot of an empty chart
-                scrnshotButton.setDisable(true);
 
-                String strToBeProcessed = textArea.getText();
-                if (restOfTheLines != null) {
-                    ListIterator<String> itr = restOfTheLines.listIterator();
-                    while (itr.hasNext()) {
-                        strToBeProcessed += "\n" + itr.next();
-                    }
-                }
-                // load data into the data processor...
-                ((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed);
-                
                 try {
                     dataset = DataSet.fromTSDFile(this.dataFilePath);
                     configureChartSettings();
                     // START PLOTTING ORIGINAL DATASET
                     ((AppData) applicationTemplate.getDataComponent()).displayData();
                     // END PLOTTING ORIGINAL DATASET
-                    
+
 //                    System.out.println("max iter:" + currentAlgConfig.maxIterations + "\nupdate interval:" + currentAlgConfig.updateInterval + "\ncontinuous?:" + currentAlgConfig.continuousRun);
-                    RandomClassifier rc = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, getChart());
-//                    System.out.println(rc);
+                    RandomClassifier rc = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, getChart(), pauser);
                     Thread t = new Thread(rc);
                     t.start();
                 } catch (IOException ex) {
                     System.out.println(ex);
                 }
 
-                // if data is plotted...
-                if (!chart.getData().isEmpty()) {
-                    // allow the user to take a screenshot of the chart
-                    scrnshotButton.setDisable(false);
-                }
                 hasNewText = false;
             }
         });
@@ -489,7 +490,7 @@ public final class AppUI extends UITemplate {
 
                         currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
                                 .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText());
-                        runButton.setVisible(true);
+                        runPauseBtn.setVisible(true);
                     }
                 } catch (NullPointerException npe) {
                     // do nothing except suppress the exception
@@ -500,9 +501,9 @@ public final class AppUI extends UITemplate {
                 currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
                         .getConfigAlg(0).get(((RadioButton) group.getSelectedToggle()).getText());
                 if (currentAlgConfig != null) {
-                    runButton.setVisible(true);
+                    runPauseBtn.setVisible(true);
                 } else {
-                    runButton.setVisible(false);
+                    runPauseBtn.setVisible(false);
                 }
             });
         });
@@ -522,7 +523,7 @@ public final class AppUI extends UITemplate {
 
                         currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
                                 .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText());
-                        runButton.setVisible(true);
+                        runPauseBtn.setVisible(true);
                     }
                 } catch (NullPointerException npe) {
                     // do nothing except suppress the exception
@@ -533,9 +534,9 @@ public final class AppUI extends UITemplate {
                 currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
                         .getConfigAlg(1).get(((RadioButton) group.getSelectedToggle()).getText());
                 if (currentAlgConfig != null) {
-                    runButton.setVisible(true);
+                    runPauseBtn.setVisible(true);
                 } else {
-                    runButton.setVisible(false);
+                    runPauseBtn.setVisible(false);
                 }
             });
         });
