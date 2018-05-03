@@ -7,17 +7,17 @@ package algorithms;
  */
 public class AlgorithmPauser {
 
-    private boolean isPaused;
+    private boolean paused;
     
     public AlgorithmPauser() {
-        isPaused = false;
+        paused = false;
     }
 
     /**
      * Prepares AlgorithmPauser to pause an Algorithm.
      */
     public synchronized void pause() {
-        isPaused = true;
+        paused = true;
     }
     
     /**
@@ -26,7 +26,7 @@ public class AlgorithmPauser {
      * @throws InterruptedException
      */
     public synchronized void shouldIPause() throws InterruptedException {
-        while (isPaused) {
+        while (paused) {
             wait();
         }
     }
@@ -35,7 +35,16 @@ public class AlgorithmPauser {
      * Wakeup thread waiting on this monitor and resume its execution.
      */
     public synchronized void resume() {
-        isPaused = false;
+        paused = false;
         notifyAll();
     }
+    
+    /**
+     * Getter for boolean value paused.
+     * @return true if thread is paused, and false if thread is NOT paused
+     */
+    public synchronized boolean isPaused(){
+        return paused;
+    }
+    
 }
