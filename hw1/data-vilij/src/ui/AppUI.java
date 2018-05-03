@@ -43,7 +43,7 @@ import vilij.templates.UITemplate;
  *
  * @author Ritwik Banerjee
  */
-public final class AppUI extends UITemplate {
+public final class AppUI extends UITemplate implements AlgResourcePreparer {
 
     /**
      * The application to which this class of actions belongs.
@@ -54,7 +54,7 @@ public final class AppUI extends UITemplate {
     private Button scrnshotButton;                  // toolbar button to take a screenshot of the data
     private LineChart<Number, Number> chart;        // the chart where data will be displayed (LineChart version of original chart)
 
-    private Button runPauseBtn;                       // workspace button to display data on the chart
+    private Button runPauseBtn;                     // workspace button to display data on the chart
     private TextArea textArea;                      // text area for new data input
     private boolean hasNewText;                     // whether or not the text area has any new data since last display
 
@@ -73,12 +73,25 @@ public final class AppUI extends UITemplate {
     private ToggleGroup group;                      //
     private Path dataFilePath;                      //
     private AlgorithmConfiguration currentAlgConfig;//
+    private Label algNotificationLabel;
     
     private DataSet dataset;
     private AlgorithmPauser pauser = new AlgorithmPauser();
+    private Thread algThread;
     
+    @Override
     public LineChart<Number, Number> getChart() {
         return chart;
+    }
+
+    @Override
+    public AlgorithmPauser getPauser() {
+        return pauser;
+    }
+
+    @Override
+    public Label getAlgNotificationLabel() {
+        return algNotificationLabel;
     }
 
     public AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
@@ -135,6 +148,7 @@ public final class AppUI extends UITemplate {
         inputDataDetails.setText("");
         // clear contents of scatter chart
         chart.getData().clear();
+        algNotificationLabel.setText("");
         // DO NOT allow the user to take a screenshot of an empty chart
         scrnshotButton.setDisable(true);
         // disable new and save buttons upon clearing textArea and chart
@@ -142,6 +156,7 @@ public final class AppUI extends UITemplate {
         disableSaveButton();
         // no new data to be displayed as there is NO DATA in textArea
         hasNewText = false;
+        algThread = null;
         // clear data contained in the ArrayLists
         firstTenLines = null;
         restOfTheLines = null;
@@ -192,8 +207,8 @@ public final class AppUI extends UITemplate {
         leftColumn.getChildren().add(selectAlgType);
         
         algorithmPane = new VBox();
-        // TODO:    iterate over ArrayList of algorithms for the given algorithm type
-        //          and add the elements to the column
+        // TODO:    iterate over ArrayList of algorithms for the given algorithm 
+        //          type and add the elements to the column
         // MOVED CODE
         
         group = new ToggleGroup();
@@ -212,12 +227,13 @@ public final class AppUI extends UITemplate {
         dataVisLabel.setFont(Font.font(null, FontWeight.BOLD, 18));
         // initialize new scatter chart with unspecified axis ranges/tick values for automatic scaling
         chart = new LineChart<>(new NumberAxis(), new NumberAxis());
-
+        algNotificationLabel = new Label();
+        
         // create second column
         VBox rightColumn = new VBox();
         rightColumn.setPrefWidth(windowWidth * .65);
         // add elements to second column
-        rightColumn.getChildren().addAll(dataVisLabel, chart);
+        rightColumn.getChildren().addAll(dataVisLabel, chart, algNotificationLabel);
         // align and space UI objects within the column
         rightColumn.setAlignment(Pos.TOP_CENTER);
         rightColumn.setPadding(new Insets(10, 20, 0, 0));
@@ -320,19 +336,16 @@ public final class AppUI extends UITemplate {
             switch (runPauseBtn.getText()) {
                 case "Run":
                     pauser.resume();
-                    scrnshotButton.setDisable(true);
-                    runPauseBtn.setText("Pause");
                     break;
                 case "Pause":
                     pauser.pause();
-                    scrnshotButton.setDisable(false);
-                    runPauseBtn.setText("Run");
                     break;
                 default:
                     break;
             }
+            alternateRunPause();
 
-            if (hasNewText) {
+            if (algThread == null || !algThread.isAlive()) {
                 // clear scatter chart immediately before plotting new data
                 chart.getData().clear();
 
@@ -344,14 +357,12 @@ public final class AppUI extends UITemplate {
                     // END PLOTTING ORIGINAL DATASET
 
 //                    System.out.println("max iter:" + currentAlgConfig.maxIterations + "\nupdate interval:" + currentAlgConfig.updateInterval + "\ncontinuous?:" + currentAlgConfig.continuousRun);
-                    RandomClassifier rc = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, getChart(), pauser);
-                    Thread t = new Thread(rc);
-                    t.start();
+                    RandomClassifier rc = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, this);
+                    algThread = new Thread(rc);
+                    algThread.start();
                 } catch (IOException ex) {
                     System.out.println(ex);
                 }
-
-                hasNewText = false;
             }
         });
 
@@ -547,7 +558,7 @@ public final class AppUI extends UITemplate {
      * display of data and subsequent iterations of algorithms that are to 
      * analyze the data.
      */
-    private void configureChartSettings(){
+    private void configureChartSettings() {
         double xMin = dataset.getBounds("xMin");
         double xMax = dataset.getBounds("xMax");
         double yMin = dataset.getBounds("yMin");
@@ -574,5 +585,22 @@ public final class AppUI extends UITemplate {
         yAxis.setLowerBound(yMin - (domainSize * .2));
         yAxis.setUpperBound(yMax + (domainSize * .2));
         yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / 5);
+    }
+    
+    @Override
+    public void alternateRunPause() {
+        
+        switch (runPauseBtn.getText()) {
+            case "Run":
+                scrnshotButton.setDisable(true);
+                runPauseBtn.setText("Pause");
+                break;
+            case "Pause":
+                scrnshotButton.setDisable(false);
+                runPauseBtn.setText("Run");
+                break;
+            default:
+                break;
+        }
     }
 }
