@@ -1,37 +1,61 @@
 package clustering;
 
+import algorithms.AlgorithmPauser;
 import algorithms.Clusterer;
 import data.DataSet;
 import javafx.geometry.Point2D;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javafx.application.Platform;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import ui.AlgResourcePreparer;
 
 /**
  * @author Ritwik Banerjee
  */
 public class KMeansClusterer extends Clusterer {
 
-    private DataSet       dataset;
-    private List<Point2D> centroids;
+    private final DataSet       dataset;
+    private List<Point2D>       centroids;
 
     private final int           maxIterations;
     private final int           updateInterval;
     private final AtomicBoolean tocontinue;
+    
+    private final AlgResourcePreparer   arp;
+    private final AlgorithmPauser       pauser;
+    
+    private final LineChart<Number, Number> chart;
 
-
-    public KMeansClusterer(DataSet dataset, int maxIterations, int updateInterval, int numberOfClusters) {
+    // TRUE if in continuous run mode, otherwise FALSE
+    // currently, this value does not change after instantiation
+    private final boolean continuousRun;
+    
+    public KMeansClusterer(DataSet dataset,
+                            int maxIterations,
+                            int updateInterval,
+                            int numberOfClusters,
+                            boolean continuousRun,
+                            AlgResourcePreparer arp) {
+        
         super(numberOfClusters);
-        this.dataset = dataset;
-        this.maxIterations = maxIterations;
+        this.dataset        = dataset;
+        this.maxIterations  = maxIterations;
         this.updateInterval = updateInterval;
-        this.tocontinue = new AtomicBoolean(false);
+        this.tocontinue     = new AtomicBoolean(false);
+        
+        this.arp            = arp;
+        this.chart          = arp.getChart();
+        this.pauser         = arp.getPauser();
+        this.continuousRun  = continuousRun;
     }
 
     @Override
@@ -45,12 +69,48 @@ public class KMeansClusterer extends Clusterer {
 
     @Override
     public void run() {
+        
         initializeCentroids();
         int iteration = 0;
         while (iteration++ < maxIterations & tocontinue.get()) {
+            try {
+                pauser.shouldIPause();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(KMeansClusterer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             assignLabels();
             recomputeCentroids();
+            if (iteration % updateInterval == 0) {
+//                System.out.println(dataset.getLabels());
+                flush();
+                if (!continuousRun) {
+                    pauser.pause();
+                    Platform.runLater(() -> {
+                        arp.alternateRunPause();
+                    });
+                }
+            }
+//            System.out.println(dataset.getLabels());
+            if (continuousRun) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(KMeansClusterer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+        
+        Platform.runLater(() -> {
+            if (!pauser.isPaused()) {
+                arp.alternateRunPause();
+            }
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("ALERT");
+            alert.setHeaderText("");
+            alert.setContentText("Algorithm Run Complete!");
+            alert.showAndWait();
+        });
     }
 
     private void initializeCentroids() {
@@ -59,8 +119,9 @@ public class KMeansClusterer extends Clusterer {
         Random       r             = new Random();
         while (chosen.size() < numberOfClusters) {
             int i = r.nextInt(instanceNames.size());
-            while (chosen.contains(instanceNames.get(i)))
+            while (instanceNames.size() < i && chosen.contains(instanceNames.get(i))) {
                 ++i;
+            }
             chosen.add(instanceNames.get(i));
         }
         centroids = chosen.stream().map(name -> dataset.getLocations().get(name)).collect(Collectors.toList());
@@ -107,4 +168,20 @@ public class KMeansClusterer extends Clusterer {
         return Math.sqrt(Math.pow(p.getX() - q.getX(), 2) + Math.pow(p.getY() - q.getY(), 2));
     }
     
+    private void flush() {
+        Platform.runLater(() -> {
+            chart.getData().clear();
+            Set<String> labels = new HashSet<>(dataset.getLabels().values());
+            for (String label : labels) {
+                XYChart.Series<Number, Number> series = new XYChart.Series<>();
+                series.setName(label);
+                dataset.getLabels().entrySet().stream().filter(entry -> entry.getValue().equals(label)).forEach(entry -> {
+                    Point2D point = dataset.getLocations().get(entry.getKey());
+                    series.getData().add(new XYChart.Data<>(point.getX(), point.getY()));
+                });
+                chart.getData().add(series);
+                series.getNode().lookup(".chart-series-line").setStyle("-fx-stroke: transparent");
+            }
+        });
+    }
 }
