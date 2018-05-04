@@ -4,6 +4,7 @@ import javafx.geometry.Point2D;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -86,6 +87,18 @@ public class DataSet {
         return dataset;
     }
  
+    public static DataSet fromInputtedData(ArrayList<String> strList) {
+        DataSet dataset = new DataSet();
+        strList.forEach(line -> {
+            try {
+                dataset.addInstance(line);
+            } catch (InvalidDataNameException e) {
+                e.printStackTrace();
+            }
+        });
+        return dataset;
+    }
+    
     /**
      * Updates the boundary records for the DataSet 
      * (notably as instances are added to the locations Map).
