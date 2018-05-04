@@ -12,6 +12,7 @@ import static java.io.File.separator;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -174,6 +175,8 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         if (selectAlgType.getItems().size() < 3) {
             selectAlgType.getItems().add(1, "Classification");
         }
+        
+        dataFilePath = null;
     }
 
     private void layout() {
@@ -324,6 +327,7 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
                 }
                 // load data into the data processor...
                 if (((AppData) applicationTemplate.getDataComponent()).loadData(strToBeProcessed)) {
+                    dataset = DataSet.fromInputtedData(new ArrayList<>(Arrays.asList(strToBeProcessed.split("\n"))));
                     textArea.setDisable(true);
                     editToggle.setText("Edit");
                 }
@@ -352,7 +356,9 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
                 chart.getData().clear();
 
                 try {
-                    dataset = DataSet.fromTSDFile(this.dataFilePath);
+                    if (dataFilePath != null) {
+                        dataset = DataSet.fromTSDFile(this.dataFilePath);
+                    }
                     configureChartSettings();
                     // START PLOTTING ORIGINAL DATASET
                     ((AppData) applicationTemplate.getDataComponent()).displayData();
