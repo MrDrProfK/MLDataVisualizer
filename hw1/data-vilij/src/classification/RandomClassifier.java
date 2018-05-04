@@ -64,13 +64,13 @@ public class RandomClassifier extends Classifier {
     public RandomClassifier(DataSet dataset,
                             int maxIterations,
                             int updateInterval,
-                            boolean tocontinue,
+                            boolean continuousRun,
                             AlgResourcePreparer arp) {
         
         this.dataset        = dataset;
         this.maxIterations  = maxIterations;
         this.updateInterval = updateInterval;
-        this.tocontinue     = new AtomicBoolean(tocontinue);
+        this.tocontinue     = new AtomicBoolean(continuousRun);
         this.chart          = arp.getChart();
         this.pauser         = arp.getPauser();
         
@@ -83,7 +83,6 @@ public class RandomClassifier extends Classifier {
     public void run() {
         series.setName("Random Classifier");
         Platform.runLater(() -> {
-            chart.setAnimated(false);
             chart.getData().add(series);
         });
         
@@ -131,7 +130,9 @@ public class RandomClassifier extends Classifier {
         }
         
         Platform.runLater(() -> {
-            arp.alternateRunPause();
+            if (!pauser.isPaused()) {
+                arp.alternateRunPause();
+            }
             Alert alert = new Alert(AlertType.WARNING);
             alert.setTitle("ALERT");
             alert.setHeaderText("");
@@ -140,7 +141,9 @@ public class RandomClassifier extends Classifier {
         });
     }
 
-    // for internal viewing only
+    /**
+     * Flushes Algorithm output data to chart for plotting. 
+     */
     protected void flush() {
 //        System.out.printf("%d\t%d\t%d%n", output.get(0), output.get(1), output.get(2));
 

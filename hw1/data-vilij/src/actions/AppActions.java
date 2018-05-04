@@ -58,9 +58,11 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleNewRequest() {
-        // if it's NOT the first request to create new data since application startup...
+        // if it's NOT the first request to create new data since application 
+        // startup...
         if (!firstNewRequest) {
-            // try to prompt user to save current work before clearing and resetting data
+            // try to prompt user to save current work before clearing and 
+            // resetting data
             try {
                 if (!firstNewRequest && promptToSave()) {
                     applicationTemplate.getUIComponent().clear();
@@ -108,8 +110,10 @@ public final class AppActions implements ActionComponent {
         PropertyManager manager = applicationTemplate.manager;
         FileChooser fileChooser = new FileChooser();
 
-        // create and add FileChooser ExtensionFilter for Tab-Separated Data Files (*.tsd)
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
+        // create and add FileChooser ExtensionFilter 
+        // for Tab-Separated Data Files (*.tsd)
+        FileChooser.ExtensionFilter extFilter = new FileChooser
+                .ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()),
                 '*' + manager.getPropertyValue(DATA_FILE_EXT.name()));
         fileChooser.getExtensionFilters().add(extFilter);
 
@@ -236,7 +240,7 @@ public final class AppActions implements ActionComponent {
         return false;
     }
     
-    public HashMap<String, AlgorithmConfiguration> getConfigAlg(int index) {
+    public HashMap<String, AlgorithmConfiguration> getAlgConfigs(int index) {
         if (index == 0) {
             return classificationAlgConfigs;
         }
@@ -250,5 +254,6 @@ public final class AppActions implements ActionComponent {
         
         classificationAlgConfigs.put("Random Classification", null);
         clusteringAlgConfigs.put("Random Clustering", null);
+        clusteringAlgConfigs.put("K-Means Clustering", null);
     }
 }
