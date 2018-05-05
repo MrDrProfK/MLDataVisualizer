@@ -1,10 +1,8 @@
 // Aaron Knoll
 package actions;
 
-import algorithms.Algorithm;
 import components.AlgConfigDialog;
 import components.AlgorithmConfiguration;
-import data.DataSet;
 import dataprocessors.AppData;
 import java.io.File;
 import static java.io.File.separator;
@@ -15,14 +13,16 @@ import vilij.templates.ApplicationTemplate;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
+import javax.imageio.ImageIO;
 import static settings.AppPropertyTypes.*;
-import ui.AlgResourcePreparer;
 import ui.AppUI;
 import ui.DataVisualizer;
 import vilij.components.ConfirmationDialog;
@@ -144,13 +144,36 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handlePrintRequest() {
-        // TODO: NOT A PART OF HW 1
+        // N/A
     }
 
     public void handleScreenshotRequest() throws IOException {
+//        System.out.println("screenshot button clicked");
         // TODO for homework 2
-    }
+        PropertyManager manager = applicationTemplate.manager;
+        
+        WritableImage wi = ((AppUI) (applicationTemplate.getUIComponent())).getChart().snapshot(new SnapshotParameters(), null);
+        
+        FileChooser fileChooser = new FileChooser();
+        // create and add FileChooser ExtensionFilter for PNG Files (*.png)
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(manager.getPropertyValue(IMAGE_FILE_EXT_DESC.name()),
+                '*' + manager.getPropertyValue(IMAGE_FILE_EXT.name()));
+        fileChooser.getExtensionFilters().add(extFilter);
 
+        try {
+            Path imageFilePath = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow()).toPath();
+
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(wi, null), "png", imageFilePath.toFile());
+            } catch (IOException ex) {
+                Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } catch (NullPointerException npe) {
+            // saving was aborted by user
+        }
+    }
+    
     /**
      * This helper method verifies that the user really wants to save their
      * unsaved work, which they might not want to do. The user will be presented

@@ -37,6 +37,8 @@ functionality within the main workspace. -->
         <!-- APPLICATION-SPECIFIC PARAMETERS -->
         <property name="DATA_FILE_EXT" value=".tsd"/>
         <property name="DATA_FILE_EXT_DESC" value="Tab-Separated Data File"/>
+        <property name="IMAGE_FILE_EXT" value=".png"/>
+        <property name="IMAGE_FILE_EXT_DESC" value="Portable Network Graphics File"/>
         <property name="TEXT_AREA" value="text area"/>
         <property name="SPECIFIED_FILE" value=" specified file"/>
 

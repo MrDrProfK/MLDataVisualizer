@@ -9,6 +9,8 @@ import algorithms.AlgorithmPauser;
 import components.AlgorithmConfiguration;
 import data.DataSet;
 import dataprocessors.AppData;
+import java.awt.image.RenderedImage;
+import java.io.File;
 import static java.io.File.separator;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -21,8 +23,10 @@ import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
@@ -33,11 +37,13 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 import static settings.AppPropertyTypes.*;
 import vilij.propertymanager.PropertyManager;
 import static vilij.settings.PropertyTypes.*;
@@ -138,6 +144,13 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         loadButton.setOnAction(e -> applicationTemplate.getActionComponent().handleLoadRequest());
         exitButton.setOnAction(e -> applicationTemplate.getActionComponent().handleExitRequest());
         printButton.setOnAction(e -> applicationTemplate.getActionComponent().handlePrintRequest());
+        scrnshotButton.setOnAction(e -> {
+            try {
+                ((AppActions) applicationTemplate.getActionComponent()).handleScreenshotRequest();
+            } catch (IOException ex) {
+                Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     @Override
@@ -238,7 +251,7 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         chart = new LineChart<>(new NumberAxis(), new NumberAxis());
         chart.setAnimated(false);
         algNotificationLabel = new Label();
-        
+
         // create second column
         VBox rightColumn = new VBox();
         rightColumn.setPrefWidth(windowWidth * .65);

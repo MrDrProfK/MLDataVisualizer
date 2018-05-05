@@ -41,6 +41,8 @@ public enum AppPropertyTypes {
     /* application-specific parameters */
     DATA_FILE_EXT,
     DATA_FILE_EXT_DESC,
+    IMAGE_FILE_EXT,
+    IMAGE_FILE_EXT_DESC,
     TEXT_AREA,
     SPECIFIED_FILE
 }
