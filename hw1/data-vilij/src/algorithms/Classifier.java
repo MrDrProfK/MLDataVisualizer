@@ -22,6 +22,11 @@ public abstract class Classifier implements Algorithm {
      */
     protected List<Integer> output;
 
-    public List<Integer> getOutput() { return output; }
+    public List<Integer> getOutput() {
+        return output;
+    }
 
+    public static String getPrettyName() {
+        return "UNINTIALIZED";
+    }
 }

@@ -1,19 +1,28 @@
 // Aaron Knoll
 package actions;
 
+import algorithms.Algorithm;
 import components.AlgConfigDialog;
 import components.AlgorithmConfiguration;
+import data.DataSet;
 import dataprocessors.AppData;
+import java.io.File;
+import static java.io.File.separator;
 import java.io.FileWriter;
 import vilij.components.ActionComponent;
 import vilij.templates.ApplicationTemplate;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import static settings.AppPropertyTypes.*;
+import ui.AlgResourcePreparer;
 import ui.AppUI;
 import ui.DataVisualizer;
 import vilij.components.ConfirmationDialog;
@@ -38,6 +47,8 @@ public final class AppActions implements ActionComponent {
      */
     Path dataFilePath;
     
+    HashMap<String, Class> algorithmClasses;
+    
     HashMap<String, AlgorithmConfiguration> classificationAlgConfigs;
     HashMap<String, AlgorithmConfiguration> clusteringAlgConfigs;
 
@@ -52,7 +63,7 @@ public final class AppActions implements ActionComponent {
         firstNewRequest             = true;
         classificationAlgConfigs    = new HashMap<>();
         clusteringAlgConfigs        = new HashMap<>();
-        
+        algorithmClasses            = new HashMap<>();
         clear();
     }
 
@@ -240,6 +251,11 @@ public final class AppActions implements ActionComponent {
         return false;
     }
     
+    public Class getAlgorithm(String prettyName) {
+        
+        return algorithmClasses.get(prettyName);
+    }
+
     public HashMap<String, AlgorithmConfiguration> getAlgConfigs(int index) {
         if (index == 0) {
             return classificationAlgConfigs;
@@ -251,9 +267,79 @@ public final class AppActions implements ActionComponent {
     public void clear() {
         classificationAlgConfigs.clear();
         clusteringAlgConfigs.clear();
-        
-        classificationAlgConfigs.put("Random Classification", null);
-        clusteringAlgConfigs.put("Random Clustering", null);
-        clusteringAlgConfigs.put("K-Means Clustering", null);
+
+        ClassLoader classLoader = AppActions.class.getClassLoader();
+        File[] classifierClasses = (new File(String.join(separator,
+                System.getProperty("user.dir"),
+                "data-vilij",
+                "src",
+                "classification"))).listFiles();
+
+//        if (classifierClasses != null) {
+        try {
+            for (File f : classifierClasses) {
+                Class c = classLoader.loadClass("classification."
+                        + f.getName().substring(0, f.getName().lastIndexOf(".java")));
+
+                try {
+                    try {
+                        algorithmClasses.put(c.getMethod("getPrettyName").invoke(null).toString(), c);
+                        classificationAlgConfigs.put(c.getMethod("getPrettyName").invoke(null).toString(), null);
+                    } catch (NoSuchMethodException | SecurityException ex) {
+                        Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException ex) {
+                    Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+//                System.out.println("aClass.getName() = " + c.getName() + " Methods: " + Arrays.toString(c.getDeclaredMethods()));
+
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+//        } else {
+//            System.out.println("Boom!");
+//        }
+//        System.out.println();
+
+        File[] clustererClasses = (new File(String.join(separator,
+                System.getProperty("user.dir"),
+                "data-vilij",
+                "src",
+                "clustering"))).listFiles();
+
+//        if (clustererClasses != null) {
+        try {
+            for (File f : clustererClasses) {
+                Class c = classLoader.loadClass("clustering."
+                        + f.getName().substring(0, f.getName().lastIndexOf(".java")));
+                
+//                c.getConstructor(DataSet.class,
+//                        int.class,
+//                        int.class,
+//                        int.class,
+//                        boolean.class,
+//                        AlgResourcePreparer.class);
+                try {
+                    try {
+                        algorithmClasses.put(c.getMethod("getPrettyName").invoke(null).toString(), c);
+                        clusteringAlgConfigs.put(c.getMethod("getPrettyName").invoke(null).toString(), null);
+                    } catch (NoSuchMethodException | SecurityException ex) {
+                        Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException ex) {
+                    Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+//                System.out.println("aClass.getName() = " + c.getName() + " Methods: " + Arrays.toString(c.getDeclaredMethods()));
+
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+//        } else {
+//            System.out.println("Boom!");
+//        }
     }
 }

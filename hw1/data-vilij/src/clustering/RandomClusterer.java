@@ -143,4 +143,8 @@ public class RandomClusterer extends Clusterer {
             }
         });
     }
+    
+    public static String getPrettyName(){
+        return "Random Clustering";
+    }
 }

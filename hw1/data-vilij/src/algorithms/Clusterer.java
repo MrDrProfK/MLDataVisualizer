@@ -16,4 +16,8 @@ public abstract class Clusterer implements Algorithm {
             k = 4;
         numberOfClusters = k;
     }
+    
+    public static String getPrettyName() {
+        return "UNINTIALIZED";
+    }
 }

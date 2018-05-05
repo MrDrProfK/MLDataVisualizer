@@ -184,4 +184,8 @@ public class KMeansClusterer extends Clusterer {
             }
         });
     }
+    
+    public static String getPrettyName(){
+        return "K-Means Clustering";
+    }
 }

@@ -4,7 +4,6 @@ import actions.AppActions;
 import components.AlgConfigDialog;
 import dataprocessors.AppData;
 import javafx.stage.Stage;
-import vilij.components.Dialog;
 import vilij.templates.ApplicationTemplate;
 
 import static vilij.settings.InitializationParams.*;

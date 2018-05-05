@@ -4,8 +4,6 @@ import algorithms.AlgorithmPauser;
 import algorithms.Classifier;
 import data.DataSet;
 
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -285,11 +283,15 @@ public class RandomClassifier extends Classifier {
             }
         });
     }
+    
+    public static String getPrettyName() {
+        return "Random Classification";
+    }
 
     /** A placeholder main method to just make sure this code runs smoothly */
-    public static void main(String... args) throws IOException {
-        DataSet          dataset    = DataSet.fromTSDFile(Paths.get("/path/to/some-data.tsd"));
+//    public static void main(String... args) throws IOException {
+//        DataSet          dataset    = DataSet.fromTSDFile(Paths.get("/path/to/some-data.tsd"));
 //        RandomClassifier classifier = new RandomClassifier(dataset, 100, 5, true, new LineChart());
 //        classifier.run(); // no multithreading yet
-    }
+//    }
 }

@@ -2,20 +2,24 @@
 package ui;
 
 import actions.AppActions;
+import algorithms.Algorithm;
 import algorithms.AlgorithmPauser;
-import classification.*;
-import clustering.*;
+//import classification.*;
+//import clustering.*;
 import components.AlgorithmConfiguration;
 import data.DataSet;
 import dataprocessors.AppData;
 import static java.io.File.separator;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -75,6 +79,7 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
     private ToggleGroup group;                      //
     private Path dataFilePath;                      //
     private AlgorithmConfiguration currentAlgConfig;//
+    private String currentAlgPrettyName;
     private Label algNotificationLabel;
     
     private DataSet dataset;
@@ -127,7 +132,7 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
 
     @Override
     protected void setToolbarHandlers(ApplicationTemplate applicationTemplate) {
-        applicationTemplate.setActionComponent(new AppActions(applicationTemplate));
+//        applicationTemplate.setActionComponent(new AppActions(applicationTemplate));
         newButton.setOnAction(e -> applicationTemplate.getActionComponent().handleNewRequest());
         saveButton.setOnAction(e -> applicationTemplate.getActionComponent().handleSaveRequest());
         loadButton.setOnAction(e -> applicationTemplate.getActionComponent().handleLoadRequest());
@@ -363,12 +368,43 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
                     // START PLOTTING ORIGINAL DATASET
                     ((AppData) applicationTemplate.getDataComponent()).displayData();
                     // END PLOTTING ORIGINAL DATASET
+                    if(currentAlgConfig.isClustering()) {
+                        try {
+                            try {
+                                algThread = new Thread((Algorithm)
+                                ((AppActions) applicationTemplate.getActionComponent())
+                                        .getAlgorithm(currentAlgPrettyName).getConstructor(DataSet.class,
+                                                int.class,
+                                                int.class,
+                                                int.class,
+                                                boolean.class,
+                                                AlgResourcePreparer.class).newInstance(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.numOfClusteringLabels, currentAlgConfig.continuousRun, this)
+                                );
+                            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        } catch (NoSuchMethodException | SecurityException ex) {
+                            Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                        }
 
+                    } else {
+                        try {
+                            try {
+                                algThread = new Thread((Algorithm) ((AppActions) applicationTemplate.getActionComponent())
+                                        .getAlgorithm(currentAlgPrettyName).getConstructor(DataSet.class,
+                                                int.class,
+                                                int.class,
+                                                boolean.class,
+                                                AlgResourcePreparer.class).newInstance(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, this)
+                                );
+                            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        } catch (NoSuchMethodException | SecurityException ex) {
+                            Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
 //                    System.out.println("max iter:" + currentAlgConfig.maxIterations + "\nupdate interval:" + currentAlgConfig.updateInterval + "\ncontinuous?:" + currentAlgConfig.continuousRun);
-//                    RandomClassifier r = new RandomClassifier(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.continuousRun, this);
-//                    KMeansClusterer r = new KMeansClusterer(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.numOfClusteringLabels, currentAlgConfig.continuousRun, this);
-                    RandomClusterer r = new RandomClusterer(dataset, currentAlgConfig.maxIterations, currentAlgConfig.updateInterval, currentAlgConfig.numOfClusteringLabels, currentAlgConfig.continuousRun, this);
-                    algThread = new Thread(r);
                     algThread.start();
                 } catch (IOException ex) {
                     System.out.println(ex);
@@ -509,8 +545,9 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
                     if (((AppActions) applicationTemplate.getActionComponent())
                             .getAlgConfigs(0).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
 
+                        currentAlgPrettyName = ((RadioButton) group.getSelectedToggle()).getText();
                         currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
-                                .getAlgConfigs(0).get(((RadioButton) group.getSelectedToggle()).getText());
+                                .getAlgConfigs(0).get(currentAlgPrettyName);
                         runPauseBtn.setVisible(true);
                     }
                 } catch (NullPointerException npe) {
@@ -519,8 +556,9 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
             });
 
             ((RadioButton) ((HBox) p).getChildren().get(1)).setOnAction(e -> {
+                currentAlgPrettyName = ((RadioButton) group.getSelectedToggle()).getText();
                 currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
-                        .getAlgConfigs(0).get(((RadioButton) group.getSelectedToggle()).getText());
+                        .getAlgConfigs(0).get(currentAlgPrettyName);
                 if (currentAlgConfig != null) {
                     runPauseBtn.setVisible(true);
                 } else {
@@ -542,8 +580,9 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
                     if (((AppActions) applicationTemplate.getActionComponent())
                             .getAlgConfigs(1).get(((RadioButton) group.getSelectedToggle()).getText()) != null) {
 
+                        currentAlgPrettyName = ((RadioButton) group.getSelectedToggle()).getText();
                         currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
-                                .getAlgConfigs(1).get(((RadioButton) group.getSelectedToggle()).getText());
+                                .getAlgConfigs(1).get(currentAlgPrettyName);
                         runPauseBtn.setVisible(true);
                     }
                 } catch (NullPointerException npe) {
@@ -552,8 +591,9 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
             });
            
             ((RadioButton) ((HBox) p).getChildren().get(1)).setOnAction(e -> {
+                currentAlgPrettyName = ((RadioButton) group.getSelectedToggle()).getText();
                 currentAlgConfig = ((AppActions) applicationTemplate.getActionComponent())
-                        .getAlgConfigs(1).get(((RadioButton) group.getSelectedToggle()).getText());
+                        .getAlgConfigs(1).get(currentAlgPrettyName);
                 if (currentAlgConfig != null) {
                     runPauseBtn.setVisible(true);
                 } else {
