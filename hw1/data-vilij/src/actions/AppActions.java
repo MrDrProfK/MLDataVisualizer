@@ -97,7 +97,6 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleSaveRequest() {
-        // TODO for homework 2
         PropertyManager manager = applicationTemplate.manager;
 
         FileChooser fileChooser = new FileChooser();
@@ -205,9 +204,14 @@ public final class AppActions implements ActionComponent {
         // N/A
     }
 
+    /**
+     * Prompts the user to save an image of the current state of the chart (in 
+     * PNG format) at a specified location.
+     *
+     * @throws IOException
+     */
     public void handleScreenshotRequest() throws IOException {
-//        System.out.println("screenshot button clicked");
-        // TODO for homework 2
+        
         PropertyManager manager = applicationTemplate.manager;
         
         WritableImage wi = ((AppUI) (applicationTemplate.getUIComponent())).getChart().snapshot(new SnapshotParameters(), null);
@@ -250,6 +254,7 @@ public final class AppActions implements ActionComponent {
      * <code>true</code> otherwise.
      */
     private boolean promptToSave() throws IOException {
+        
         PropertyManager manager = applicationTemplate.manager;
 
         ConfirmationDialog confirmationDialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
@@ -290,6 +295,13 @@ public final class AppActions implements ActionComponent {
         return true;
     }
 
+    /**
+     * Assigns runtime configuration settings to Algorithms.
+     *
+     * @param algName
+     * @return true if the Algorithm configuration was modified, or false
+     * otherwise
+     */
     public boolean configAlgorithm(String algName) {
 
         AlgConfigDialog algConfigDialog = DataVisualizer.getAlgConfigDialog();
@@ -333,11 +345,26 @@ public final class AppActions implements ActionComponent {
         return false;
     }
     
+    /**
+     * Getter for a particular Algorithm Class that was previously loaded 
+     * dynamically using reflection.
+     *
+     * @param prettyName
+     * @return Class for the specified Algorithm name.
+     */
     public Class getAlgorithm(String prettyName) {
         
         return algorithmClasses.get(prettyName);
     }
 
+    /**
+     * Getter for Algorithm runtime configuration settings.
+     *
+     * @param index specifies the corresponding desired Algorithm type (0 for
+     * classification, and 1 for clustering)
+     * @return HashMap of configuration settings for available Algorithms of the
+     * specified desired type
+     */
     public HashMap<String, AlgorithmConfiguration> getAlgConfigs(int index) {
         if (index == 0) {
             return classificationAlgConfigs;
@@ -346,7 +373,12 @@ public final class AppActions implements ActionComponent {
         return clusteringAlgConfigs;
     }
     
+    /**
+     * Clears and reloads HashMaps for tracking dynamically loaded Algorithms 
+     * and their runtime configuration settings.
+     */
     public void clear() {
+        algorithmClasses.clear();
         classificationAlgConfigs.clear();
         clusteringAlgConfigs.clear();
 
