@@ -7,8 +7,6 @@ import data.DataSet;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -85,12 +83,15 @@ public class RandomClassifier extends Classifier {
         });
         
         for (int i = 1; i <= maxIterations; i++) {
+            if (pauser.terminateIfExitBtnClicked()) {
+                return;
+            }
             try {
                 pauser.shouldIPause();
             } catch (InterruptedException ex) {
-                Logger.getLogger(RandomClassifier.class.getName()).log(Level.SEVERE, null, ex);
+                return;
             }
-            
+
             int xCoefficient = new Double(RAND.nextDouble() * 100).intValue();
             int yCoefficient = new Double(RAND.nextDouble() * 100).intValue();
             int constant = new Double(RAND.nextDouble() * 100).intValue();
@@ -101,8 +102,6 @@ public class RandomClassifier extends Classifier {
             // everything below is just for internal viewing of how the output is changing
             // in the final project, such changes will be dynamically visible in the UI
             if (i % updateInterval == 0) {
-//                System.out.printf("Iteration number %d: ", i);
-//                System.out.println("clicked");
                 flush();
                 if (!tocontinue()) {
                     pauser.pause();
@@ -112,9 +111,6 @@ public class RandomClassifier extends Classifier {
                 }
             }
             if (i > maxIterations * .6 && RAND.nextDouble() < 0.05) {
-//                System.out.printf("Iteration number %d: ", i);
-//                flush();
-//                System.out.println("An Early Break!");
                 break;
             }
             
@@ -122,7 +118,7 @@ public class RandomClassifier extends Classifier {
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(RandomClassifier.class.getName()).log(Level.SEVERE, null, ex);
+                    return;
                 }
             }
         }
@@ -143,7 +139,6 @@ public class RandomClassifier extends Classifier {
      * Flushes Algorithm output data to chart for plotting. 
      */
     protected void flush() {
-//        System.out.printf("%d\t%d\t%d%n", output.get(0), output.get(1), output.get(2));
 
         double xMin = dataset.getBounds("xMin");
         double xMax = dataset.getBounds("xMax");

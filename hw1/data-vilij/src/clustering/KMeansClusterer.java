@@ -8,8 +8,6 @@ import javafx.geometry.Point2D;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javafx.application.Platform;
@@ -73,16 +71,19 @@ public class KMeansClusterer extends Clusterer {
         initializeCentroids();
         int iteration = 0;
         while (iteration++ < maxIterations & tocontinue.get()) {
+            if (pauser.terminateIfExitBtnClicked()) {
+                return;
+            }
             try {
                 pauser.shouldIPause();
             } catch (InterruptedException ex) {
-                Logger.getLogger(KMeansClusterer.class.getName()).log(Level.SEVERE, null, ex);
+                return;
             }
             
             assignLabels();
             recomputeCentroids();
             if (iteration % updateInterval == 0) {
-//                System.out.println(dataset.getLabels());
+                
                 flush();
                 if (!continuousRun) {
                     pauser.pause();
@@ -91,12 +92,12 @@ public class KMeansClusterer extends Clusterer {
                     });
                 }
             }
-//            System.out.println(dataset.getLabels());
+            
             if (continuousRun) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(KMeansClusterer.class.getName()).log(Level.SEVERE, null, ex);
+                    return;
                 }
             }
         }

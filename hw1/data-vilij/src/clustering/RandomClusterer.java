@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.chart.LineChart;
@@ -75,10 +73,13 @@ public class RandomClusterer extends Clusterer {
         
         int iteration = 0;
         while (iteration++ < maxIterations) {
+            if(pauser.terminateIfExitBtnClicked()){
+                return;
+            }
             try {
                 pauser.shouldIPause();
             } catch (InterruptedException ex) {
-                Logger.getLogger(KMeansClusterer.class.getName()).log(Level.SEVERE, null, ex);
+                return;
             }
             
             randomlyAssignLabels();
@@ -93,15 +94,13 @@ public class RandomClusterer extends Clusterer {
                 }
             }
             if (iteration > maxIterations * .6 && RAND.nextDouble() < 0.05) {
-//                flush();
-//                System.out.println("An Early Break!");
                 break;
             }
             if (tocontinue()) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(RandomClusterer.class.getName()).log(Level.SEVERE, null, ex);
+                    return;
                 }
             }
         }
