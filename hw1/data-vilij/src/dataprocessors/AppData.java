@@ -35,7 +35,6 @@ public class AppData implements DataComponent {
 
     @Override
     public void loadData(Path dataFilePath) {
-        // TODO for homework 2
         PropertyManager manager = applicationTemplate.manager;
         // clear data from data processor
         clear();
@@ -70,7 +69,6 @@ public class AppData implements DataComponent {
 
             }
         } catch (Exception ex) {
-            // TODO: create appropriate Dialog Box
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
                     .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
                             ex.getMessage());
@@ -78,14 +76,10 @@ public class AppData implements DataComponent {
     }
 
     public boolean loadData(String dataString) {
-        // TODO for homework 1
         PropertyManager manager = applicationTemplate.manager;
         clear();
         try {
-            if (processor.getErrorLineNumber(dataString) != null) {
-                // plot data
-//                displayData();
-            }
+            processor.getErrorLineNumber(dataString);
         } catch (Exception ex) {
             applicationTemplate.getDialog(Dialog.DialogType.ERROR)
                     .show(manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
@@ -99,7 +93,8 @@ public class AppData implements DataComponent {
 
     @Override
     public void saveData(Path dataFilePath) {
-        // TODO for homework 2
+        // clear data from data processor
+        clear();
         PropertyManager manager = applicationTemplate.manager;
         String strToBeProcessed = ((AppUI) applicationTemplate.getUIComponent()).getTextAreaData();
         try {
@@ -120,8 +115,6 @@ public class AppData implements DataComponent {
                     .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()),
                             ex.getMessage());
         }
-        // clear data from data processor
-        clear();
     }
 
     @Override
