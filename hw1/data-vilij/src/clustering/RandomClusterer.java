@@ -84,7 +84,6 @@ public class RandomClusterer extends Clusterer {
             
             randomlyAssignLabels();
             if (iteration % updateInterval == 0) {
-                System.out.println(dataset.getLabels());
                 flush();
                 if (!tocontinue()) {
                     pauser.pause();

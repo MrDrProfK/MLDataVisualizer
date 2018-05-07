@@ -9,8 +9,6 @@ import algorithms.AlgorithmPauser;
 import components.AlgorithmConfiguration;
 import data.DataSet;
 import dataprocessors.AppData;
-import java.awt.image.RenderedImage;
-import java.io.File;
 import static java.io.File.separator;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -23,10 +21,8 @@ import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
@@ -37,13 +33,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
 import static settings.AppPropertyTypes.*;
 import vilij.propertymanager.PropertyManager;
 import static vilij.settings.PropertyTypes.*;
@@ -78,18 +72,18 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
     private Button editToggle;                      // toggle for edit/done functionality
     private ChoiceBox selectAlgType;                // drop-down for algorithm type selection
     
-    private final VBox leftColumn = new VBox();     // create first column
+    private VBox leftColumn;                        // left column of GUI
     private VBox algorithmPane;
-    private Label inputDataDetails;                 // 
-    private final HBox editTogglePane = new HBox(); // 
-    private ToggleGroup group;                      //
-    private Path dataFilePath;                      //
-    private AlgorithmConfiguration currentAlgConfig;//
+    private Label inputDataDetails;                
+    private HBox editTogglePane; 
+    private ToggleGroup group;                     
+    private Path dataFilePath;                     
+    private AlgorithmConfiguration currentAlgConfig;
     private String currentAlgPrettyName;
     private Label algNotificationLabel;
     
     private DataSet dataset;
-    private AlgorithmPauser pauser = new AlgorithmPauser();
+    private final AlgorithmPauser pauser = new AlgorithmPauser();
     private Thread algThread;
     
     @Override
@@ -138,7 +132,6 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
 
     @Override
     protected void setToolbarHandlers(ApplicationTemplate applicationTemplate) {
-//        applicationTemplate.setActionComponent(new AppActions(applicationTemplate));
         newButton.setOnAction(e -> applicationTemplate.getActionComponent().handleNewRequest());
         saveButton.setOnAction(e -> applicationTemplate.getActionComponent().handleSaveRequest());
         loadButton.setOnAction(e -> applicationTemplate.getActionComponent().handleLoadRequest());
@@ -210,6 +203,7 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
        
         editToggle = new Button("Done");
         
+        editTogglePane = new HBox();
         editTogglePane.setPadding(new Insets(0, 0, -9, 0));
         editTogglePane.setAlignment(Pos.CENTER_RIGHT);
         editTogglePane.getChildren().add(editToggle);
@@ -220,6 +214,7 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         selectAlgType = new ChoiceBox(FXCollections.observableArrayList("Algorithm Type", "Classification", "Clustering"));
         selectAlgType.getSelectionModel().selectFirst();
         
+        leftColumn = new VBox();
         leftColumn.setPrefWidth(windowWidth * .35);
         // add elements to first column
         leftColumn.getChildren().add(dataFileLabel);
@@ -228,13 +223,9 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         leftColumn.getChildren().add(inputDataDetails);
         leftColumn.getChildren().add(selectAlgType);
         
-        algorithmPane = new VBox();
-        // TODO:    iterate over ArrayList of algorithms for the given algorithm 
-        //          type and add the elements to the column
-        // MOVED CODE
-        
         group = new ToggleGroup();
-
+        
+        algorithmPane = new VBox();
         leftColumn.getChildren().addAll(algorithmPane, runPauseBtn);
 
         // align and space UI objects within the column
@@ -273,8 +264,6 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         hasNewText = false;
         
         selectAlgType.setOnAction(e -> {
-            // clear HashMap data containing custom algorithm
-//            ((AppActions) applicationTemplate.getActionComponent()).clear();
             
             if (group.getSelectedToggle() != null) {
                 ((RadioButton) group.getSelectedToggle()).setSelected(false);
@@ -417,7 +406,6 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
                             Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-//                    System.out.println("max iter:" + currentAlgConfig.maxIterations + "\nupdate interval:" + currentAlgConfig.updateInterval + "\ncontinuous?:" + currentAlgConfig.continuousRun);
                     algThread.start();
                 } catch (IOException ex) {
                     System.out.println(ex);
@@ -524,7 +512,6 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         }
         if (!textArea.getText().trim().isEmpty()) {
             newButton.setDisable(false);
-            hasNewText = true;
         }
         disableSaveButton();
         
@@ -650,6 +637,10 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
         yAxis.setTickUnit((yAxis.getUpperBound() - yAxis.getLowerBound()) / 5);
     }
     
+    /**
+     * Alternates text displayed on runPauseBtn and appropriately toggles a 
+     * user's ability to take a screenshot.
+     */
     @Override
     public void alternateRunPause() {
         
@@ -665,5 +656,30 @@ public final class AppUI extends UITemplate implements AlgResourcePreparer {
             default:
                 break;
         }
+    }
+    
+    /**
+     * Getter for a ref to the Algorithm Thread.
+     *
+     * @return
+     */
+    public Thread getAlgThread(){
+        return algThread;
+    }
+    
+    /**
+     * Getter for the boolean flag hasNewText.
+     *
+     * @return
+     */
+    public boolean hasUnsavedData() {
+        return hasNewText;
+    }
+    
+    /**
+     * Disables flag hasNewText.
+     */
+    public void newTextSaved(){
+        hasNewText = false;
     }
 }

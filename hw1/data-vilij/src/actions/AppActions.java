@@ -1,6 +1,7 @@
 // Aaron Knoll
 package actions;
 
+import algorithms.AlgorithmPauser;
 import components.AlgConfigDialog;
 import components.AlgorithmConfiguration;
 import dataprocessors.AppData;
@@ -19,6 +20,9 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 import javax.imageio.ImageIO;
@@ -75,7 +79,7 @@ public final class AppActions implements ActionComponent {
             // try to prompt user to save current work before clearing and 
             // resetting data
             try {
-                if (!firstNewRequest && promptToSave()) {
+                if (promptToSave()) {
                     applicationTemplate.getUIComponent().clear();
                     dataFilePath = null;
                 }
@@ -110,7 +114,8 @@ public final class AppActions implements ActionComponent {
             }
 
             ((AppData) (applicationTemplate.getDataComponent())).saveData(dataFilePath);
-
+            ((AppUI) applicationTemplate.getUIComponent()).newTextSaved();
+            
         } catch (NullPointerException npe) {
             // do nothing. save was aborted by user.
         }
@@ -139,7 +144,60 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleExitRequest() {
-        Platform.exit();
+        Thread t = ((AppUI) (applicationTemplate.getUIComponent())).getAlgThread();
+        AlgorithmPauser p = ((AppUI) (applicationTemplate.getUIComponent())).getPauser();
+
+        if (((AppUI) (applicationTemplate.getUIComponent())).hasUnsavedData()) {
+            try {
+                if (promptToSave()) {
+
+                    if (t != null && t.isAlive()) {
+                        Alert alert = new Alert(AlertType.WARNING);
+                        alert.setTitle("Algorithm Execution in Progress");
+                        alert.setHeaderText("An Algorithm is Running!");
+                        alert.setContentText("Are you sure you want to terminate it?");
+
+                        ButtonType yesBtn = new ButtonType("Yes");
+                        ButtonType noBtn = new ButtonType("No");
+
+                        alert.getButtonTypes().setAll(yesBtn, noBtn);
+                        
+                        if (alert.showAndWait().get() == yesBtn) {
+                            t.interrupt();
+                            p.terminateRunningAlgThread();
+
+                            Platform.exit();
+                        }
+                    } else {
+                        Platform.exit();
+                    }
+                }
+            } catch (IOException promptException) {
+                PropertyManager manager = applicationTemplate.manager;
+                applicationTemplate.getDialog(Dialog.DialogType.ERROR)
+                        .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
+            }
+        } else if (t != null && t.isAlive()) {
+
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("Algorithm Execution in Progress");
+            alert.setHeaderText("An Algorithm is Running!");
+            alert.setContentText("Are you sure you want to terminate it?");
+
+            ButtonType yesBtn = new ButtonType("Yes");
+            ButtonType noBtn = new ButtonType("No");
+
+            alert.getButtonTypes().setAll(yesBtn, noBtn);
+
+            if (alert.showAndWait().get() == yesBtn) {
+                t.interrupt();
+                p.terminateRunningAlgThread();
+
+                Platform.exit();
+            }
+        } else {
+            Platform.exit();
+        }
     }
 
     @Override
@@ -216,6 +274,7 @@ public final class AppActions implements ActionComponent {
                 try (FileWriter fileWriter = new FileWriter(dataFilePath.toFile())) {
                     // write contents of textArea to file
                     fileWriter.write(((AppUI) applicationTemplate.getUIComponent()).getTextAreaData());
+                    ((AppUI) applicationTemplate.getUIComponent()).newTextSaved();
                 } catch (Exception e) {
                     throw new IOException(manager.getPropertyValue(DATA_NOT_SAVED_WARNING.name()), e);
                 }
@@ -298,7 +357,6 @@ public final class AppActions implements ActionComponent {
                 "src",
                 "classification"))).listFiles();
 
-//        if (classifierClasses != null) {
         try {
             for (File f : classifierClasses) {
                 Class c = classLoader.loadClass("classification."
@@ -314,17 +372,11 @@ public final class AppActions implements ActionComponent {
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException ex) {
                     Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
-//                System.out.println("aClass.getName() = " + c.getName() + " Methods: " + Arrays.toString(c.getDeclaredMethods()));
-
+                
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        } else {
-//            System.out.println("Boom!");
-//        }
-//        System.out.println();
 
         File[] clustererClasses = (new File(String.join(separator,
                 System.getProperty("user.dir"),
@@ -332,18 +384,11 @@ public final class AppActions implements ActionComponent {
                 "src",
                 "clustering"))).listFiles();
 
-//        if (clustererClasses != null) {
         try {
             for (File f : clustererClasses) {
                 Class c = classLoader.loadClass("clustering."
                         + f.getName().substring(0, f.getName().lastIndexOf(".java")));
                 
-//                c.getConstructor(DataSet.class,
-//                        int.class,
-//                        int.class,
-//                        int.class,
-//                        boolean.class,
-//                        AlgResourcePreparer.class);
                 try {
                     try {
                         algorithmClasses.put(c.getMethod("getPrettyName").invoke(null).toString(), c);
@@ -355,14 +400,9 @@ public final class AppActions implements ActionComponent {
                     Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-//                System.out.println("aClass.getName() = " + c.getName() + " Methods: " + Arrays.toString(c.getDeclaredMethods()));
-
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        } else {
-//            System.out.println("Boom!");
-//        }
     }
 }
