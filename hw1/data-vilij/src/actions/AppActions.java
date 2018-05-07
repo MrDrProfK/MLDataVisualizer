@@ -149,24 +149,8 @@ public final class AppActions implements ActionComponent {
         if (((AppUI) (applicationTemplate.getUIComponent())).hasUnsavedData()) {
             try {
                 if (promptToSave()) {
-
                     if (t != null && t.isAlive()) {
-                        Alert alert = new Alert(AlertType.WARNING);
-                        alert.setTitle("Algorithm Execution in Progress");
-                        alert.setHeaderText("An Algorithm is Running!");
-                        alert.setContentText("Are you sure you want to terminate it?");
-
-                        ButtonType yesBtn = new ButtonType("Yes");
-                        ButtonType noBtn = new ButtonType("No");
-
-                        alert.getButtonTypes().setAll(yesBtn, noBtn);
-                        
-                        if (alert.showAndWait().get() == yesBtn) {
-                            t.interrupt();
-                            p.terminateRunningAlgThread();
-
-                            Platform.exit();
-                        }
+                        promptToTerminateAlgExec(t, p);
                     } else {
                         Platform.exit();
                     }
@@ -177,23 +161,7 @@ public final class AppActions implements ActionComponent {
                         .show(manager.getPropertyValue(DATA_NOT_SAVED_WARNING_TITLE.name()), promptException.getLocalizedMessage());
             }
         } else if (t != null && t.isAlive()) {
-
-            Alert alert = new Alert(AlertType.WARNING);
-            alert.setTitle("Algorithm Execution in Progress");
-            alert.setHeaderText("An Algorithm is Running!");
-            alert.setContentText("Are you sure you want to terminate it?");
-
-            ButtonType yesBtn = new ButtonType("Yes");
-            ButtonType noBtn = new ButtonType("No");
-
-            alert.getButtonTypes().setAll(yesBtn, noBtn);
-
-            if (alert.showAndWait().get() == yesBtn) {
-                t.interrupt();
-                p.terminateRunningAlgThread();
-
-                Platform.exit();
-            }
+            promptToTerminateAlgExec(t, p);
         } else {
             Platform.exit();
         }
@@ -374,8 +342,10 @@ public final class AppActions implements ActionComponent {
     }
     
     /**
-     * Clears and reloads HashMaps for tracking dynamically loaded Algorithms 
-     * and their runtime configuration settings.
+     * Clears and loads HashMaps for tracking dynamically loaded Algorithms 
+     * and their runtime configuration settings. Algorithms to be loaded at 
+     * runtime must be located in appropriate folders (labeled by Algorithm 
+     * type), in order to be read by the application. 
      */
     public void clear() {
         algorithmClasses.clear();
@@ -435,6 +405,31 @@ public final class AppActions implements ActionComponent {
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
+     * Prompts the user to terminate a running Algorithm.
+     *
+     * @param t Algorithm thread.
+     * @param p AlgorithmPauser instance.
+     */
+    private void promptToTerminateAlgExec(Thread t, AlgorithmPauser p) {
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Algorithm Execution in Progress");
+        alert.setHeaderText("An Algorithm is Running!");
+        alert.setContentText("Are you sure you want to terminate it?");
+
+        ButtonType yesBtn = new ButtonType("Yes");
+        ButtonType noBtn = new ButtonType("No");
+
+        alert.getButtonTypes().setAll(yesBtn, noBtn);
+
+        if (alert.showAndWait().get() == yesBtn) {
+            t.interrupt();
+            p.terminateRunningAlgThread();
+
+            Platform.exit();
         }
     }
 }
